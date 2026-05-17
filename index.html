@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NutriSnap Prototype</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #10b981;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 font-sans antialiased selection:bg-emerald-200">
+
+<div class="max-w-md mx-auto bg-white min-h-screen flex flex-col shadow-xl overflow-hidden relative">
+
+    <header class="bg-emerald-600 text-white p-4 flex justify-between items-center shadow-md z-10 relative">
+        <div class="flex items-center gap-2">
+            <span class="text-2xl">🥗</span>
+            <h1 class="font-black text-xl tracking-tight">NutriSnap</h1>
+        </div>
+        <button id="reset-btn" class="hidden bg-emerald-700 hover:bg-emerald-800 text-white text-sm font-bold py-1.5 px-4 rounded-lg transition-colors">
+            Reset
+        </button>
+    </header>
+
+    <div id="screen-onboarding" class="p-6 flex flex-col flex-grow">
+        <h2 class="text-3xl font-extrabold mb-2 text-gray-900">Welcome! 👋</h2>
+        <p class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
+        
+        <div class="space-y-3 mb-8">
+            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
+                <input type="radio" name="goal" value="General Healthy / Balanced Eating" checked class="w-5 h-5 text-emerald-600">
+                <span class="ml-3 font-medium text-gray-700">General Healthy / Balanced Eating</span>
+            </label>
+            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
+                <input type="radio" name="goal" value="Heart Healthy (Low Sodium/Lower Fat)" class="w-5 h-5 text-emerald-600">
+                <span class="ml-3 font-medium text-gray-700">Heart Healthy (Low Sodium/Lower Fat)</span>
+            </label>
+            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
+                <input type="radio" name="goal" value="Fitness & High Protein" class="w-5 h-5 text-emerald-600">
+                <span class="ml-3 font-medium text-gray-700">Fitness & High Protein</span>
+            </label>
+            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
+                <input type="radio" name="goal" value="Diabetic (Blood Sugar, Low Glycemic, & Carb Focus)" class="w-5 h-5 text-emerald-600">
+                <span class="ml-3 font-medium text-gray-700">Diabetic (Blood Sugar & Carb Focus)</span>
+            </label>
+        </div>
+
+        <button onclick="navigateTo('screen-capture')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-auto transition-colors">
+            Get Started
+        </button>
+
+        <div class="mt-8 pt-6 border-t border-gray-100 flex-grow">
+            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Recent Scans</h3>
+            <div id="history-container" class="space-y-2 overflow-y-auto max-h-48">
+                <p class="text-xs text-gray-400 italic">No meals scanned yet.</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-capture" class="p-6 flex flex-col flex-grow justify-center items-center hidden">
+        <h2 class="text-2xl font-bold text-gray-800 mb-2 text-center">Snap Your Meal</h2>
+        <p class="text-gray-500 text-sm text-center mb-8">Upload a picture of your plate, recipes, or ingredients to analyze.</p>
+        
+        <div class="flex w-full max-w-xs mx-auto bg-gray-100 rounded-xl p-1 mb-6">
+            <label class="flex-1 text-center relative">
+                <input type="radio" name="scan-mode" value="meal" checked class="peer hidden">
+                <div class="peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow text-gray-500 font-semibold text-sm py-2 rounded-lg cursor-pointer transition-all">
+                    🍽️ Plated Meal
+                </div>
+            </label>
+            <label class="flex-1 text-center relative">
+                <input type="radio" name="scan-mode" value="recipe" class="peer hidden">
+                <div class="peer-checked:bg-white peer-checked:text-emerald-700 peer-checked:shadow text-gray-500 font-semibold text-sm py-2 rounded-lg cursor-pointer transition-all">
+                    📄 Recipe/Label
+                </div>
+            </label>
+        </div>
+
+        <label class="w-48 h-48 flex flex-col items-center justify-center bg-emerald-50 border-4 border-dashed border-emerald-300 rounded-full cursor-pointer hover:bg-emerald-100 transition-all shadow-sm">
+            <span class="text-4xl mb-2">📸</span>
+            <span class="text-emerald-700 font-bold text-sm">Take Photo / Upload</span>
+            <input type="file" accept="image/*" class="hidden">
+        </label>
+    </div>
+
+    <div id="screen-loading" class="p-6 flex flex-col flex-grow justify-center items-center hidden bg-white z-20 absolute inset-0 mt-16">
+        <div class="loader mb-6"></div>
+        <h2 class="text-xl font-bold text-gray-800 mb-2">Analyzing image...</h2>
+        <p class="text-gray-500 text-sm text-center animate-pulse">Checking ingredients and calculating ratios</p>
+    </div>
+
+    <div id="screen-results" class="p-6 flex flex-col flex-grow overflow-y-auto hidden">
+        
+        <div class="bg-emerald-50 rounded-2xl p-5 mb-6 flex justify-between items-center shadow-sm border border-emerald-100">
+            <div class="pr-4">
+                <h2 id="result-status" class="text-2xl font-black text-emerald-800 mb-1 leading-tight">Excellent Choice!</h2>
+                <p id="detected-meal" class="text-emerald-700 text-sm font-medium">Detected: Meal Name</p>
+            </div>
+            
+            <div class="relative w-20 h-20 flex-shrink-0">
+                <svg class="w-full h-full transform -rotate-90" viewBox="0 0 76 76">
+                    <circle cx="38" cy="38" r="34" stroke="currentColor" stroke-width="8" fill="transparent" class="text-emerald-200" />
+                    <circle cx="38" cy="38" r="34" stroke="currentColor" stroke-width="8" fill="transparent" stroke-dasharray="213.6" stroke-dashoffset="0" class="score-circle text-emerald-500 transition-all duration-1000 ease-out" stroke-linecap="round"/>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center">
+                    <span id="score-text" class="text-2xl font-black text-gray-800">85</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+            <div>
+                <h3 class="flex items-center font-bold text-emerald-700 mb-3 uppercase tracking-wide text-sm">
+                    <span class="w-3 h-3 rounded-full bg-emerald-500 mr-2 shadow-sm"></span> Positive Aspects
+                </h3>
+                <ul id="list-pros" class="space-y-2 text-gray-600 text-sm leading-relaxed ml-2"></ul>
+            </div>
+            
+            <div class="w-full h-px bg-gray-100"></div>
+
+            <div>
+                <h3 class="flex items-center font-bold text-amber-600 mb-3 uppercase tracking-wide text-sm">
+                    <span class="w-3 h-3 rounded-full bg-amber-400 mr-2 shadow-sm"></span> Considerations
+                </h3>
+                <ul id="list-cons" class="space-y-2 text-gray-600 text-sm leading-relaxed ml-2"></ul>
+            </div>
+
+            <div class="w-full h-px bg-gray-100"></div>
+
+            <div class="bg-blue-50 rounded-xl p-4 border border-blue-100">
+                <h3 class="flex items-center font-bold text-blue-700 mb-2 uppercase tracking-wide text-xs">
+                    💡 Recommendations
+                </h3>
+                <p id="recommendation-text" class="text-gray-700 text-sm font-medium leading-relaxed"></p>
+            </div>
+        </div>
+        <div class="h-8"></div> </div>
+</div>
+
+<script>
+
+    function navigateTo(screenId) {
+        ['screen-onboarding', 'screen-capture', 'screen-loading', 'screen-results'].forEach(id => {
+            document.getElementById(id).classList.add('hidden');
+        });
+        document.getElementById(screenId).classList.remove('hidden');
+        if (screenId === 'screen-results' || screenId === 'screen-capture') {
+            document.getElementById('reset-btn').classList.remove('hidden');
+        } else {
+            document.getElementById('reset-btn').classList.add('hidden');
+            loadHistory(); 
+        }
+    }
+
+    function compressImage(file, maxWidth) {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = event => {
+                const img = new Image();
+                img.src = event.target.result;
+                img.onload = () => {
+                    const ratio = Math.min(maxWidth / img.width, 1);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width * ratio;
+                    canvas.height = img.height * ratio;
+                    
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    
+                    const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7).split(',')[1];
+                    resolve(compressedBase64);
+                };
+            };
+            reader.onerror = error => reject(error);
+        });
+    }
+
+    function loadHistory() {
+        const historyContainer = document.getElementById('history-container');
+        const history = JSON.parse(localStorage.getItem('nutrisnap_history') || '[]');
+        
+        if (history.length === 0) {
+            historyContainer.innerHTML = '<p class="text-xs text-gray-400 italic">No meals scanned yet.</p>';
+            return;
+        }
+
+        historyContainer.innerHTML = history.map(item => `
+            <div class="flex justify-between items-center bg-gray-50 p-3 rounded-lg border border-gray-200">
+                <div class="truncate pr-4">
+                    <p class="text-xs text-gray-500 font-medium">${item.date}</p>
+                    <p class="text-sm font-bold text-gray-800 truncate">${item.meal}</p>
+                </div>
+                <div class="bg-emerald-100 text-emerald-800 font-black px-3 py-1.5 rounded-full text-xs shadow-sm">
+                    ${item.score}
+                </div>
+            </div>
+        `).join('');
+    }
+    
+    loadHistory(); 
+
+    async function processImage(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        // 1. Switch to loading screen
+        navigateTo('screen-loading');
+
+        // 2. Grab user inputs FIRST so the app doesn't crash
+        const selectedGoal = document.querySelector('input[name="goal"]:checked').value;
+        const scanMode = document.querySelector('input[name="scan-mode"]:checked').value;
+
+        // 3. Start the dynamic UX text trick
+        const loadingText = document.querySelector('#screen-loading p');
+        const loadingMessages = [
+            "Scanning image...",
+            scanMode === 'recipe' ? "Reading ingredient list..." : "Identifying food items...",
+            "Calculating nutritional values...",
+            "Cross-referencing with your dietary goals...",
+            "Finalizing your score..."
+        ];
+        let messageIndex = 0;
+        const loadingInterval = setInterval(() => {
+            messageIndex = (messageIndex + 1) % loadingMessages.length;
+            loadingText.innerText = loadingMessages[messageIndex];
+        }, 2500);
+
+        try {
+            // 4. Smart Compression (1600px for text, 800px for photos)
+            const resolution = scanMode === 'recipe' ? 1600 : 800;
+            const base64Image = await compressImage(file, resolution);
+            const mimeType = "image/jpeg";
+
+            // 5. Dynamic AI Instructions
+            let contextInstruction = scanMode === "meal" 
+                ? "Analyze this photo of a plated meal." 
+                : "Read the text in this image (it is a recipe, ingredient list, or nutrition label). Calculate the approximate nutritional value of one serving based on the text.";
+
+            const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
+            
+            const prompt = `You are an expert nutritional coach. The user's dietary focus is: ${selectedGoal}. 
+            ${contextInstruction}
+            
+            Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
+            {
+                "meal_identified": "Name of meal or recipe",
+                "health_score": number 0-100,
+                "positives": ["positive 1", "positive 2"],
+                "negatives": ["negative 1", "negative 2"],
+                "recommendation": "Highly actionable swap or adjustment"
+            }`;
+
+            const requestBody = {
+                contents: [{
+                    parts: [
+                        { text: prompt },
+                        { inline_data: { mime_type: mimeType, data: base64Image } }
+                    ]
+                }],
+                generationConfig: { responseMimeType: "application/json", temperature: 0.4 }
+            };
+
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestBody)
+            });
+
+            const data = await response.json();
+            const result = JSON.parse(data.candidates[0].content.parts[0].text);
+
+            // 6. Save to history
+            const historyItem = {
+                date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                meal: result.meal_identified,
+                score: result.health_score
+            };
+            let history = JSON.parse(localStorage.getItem('nutrisnap_history') || '[]');
+            history.unshift(historyItem); 
+            if (history.length > 10) history.pop(); 
+            localStorage.setItem('nutrisnap_history', JSON.stringify(history));
+
+            // 7. Inject data into UI
+            document.getElementById('result-status').innerText = result.health_score >= 70 ? "Great Choice!" : "Needs Tweaking";
+            document.getElementById('detected-meal').innerText = "Detected: " + result.meal_identified;
+            document.getElementById('score-text').innerText = result.health_score;
+            
+            document.getElementById('list-pros').innerHTML = result.positives.map(p => `<li>• ${p}</li>`).join('');
+            document.getElementById('list-cons').innerHTML = result.negatives.map(n => `<li>• ${n}</li>`).join('');
+            document.getElementById('recommendation-text').innerText = result.recommendation;
+
+            // 8. Animate the score circle
+            const circle = document.querySelector('.score-circle');
+            const offset = 213.6 - (result.health_score / 100) * 213.6;
+            circle.style.strokeDashoffset = offset;
+            
+            circle.classList.remove('text-emerald-500', 'text-amber-500', 'text-red-500');
+            if (result.health_score >= 70) circle.classList.add('text-emerald-500');
+            else if (result.health_score >= 40) circle.classList.add('text-amber-500');
+            else circle.classList.add('text-red-500');
+
+            // 9. Stop the loading text and show results
+            clearInterval(loadingInterval);
+            navigateTo('screen-results');
+
+        } catch (error) {
+            // If anything fails, stop the text cycle and show an error
+            clearInterval(loadingInterval);
+            console.error("Analysis Failed:", error);
+            alert("Something went wrong analyzing the image. Check your console!");
+            navigateTo('screen-capture');
+        }
+    }
+
+    document.querySelector('input[type="file"]').onchange = processImage;
+    document.getElementById('reset-btn').addEventListener('click', () => {
+        navigateTo('screen-onboarding');
+        document.querySelector('input[type="file"]').value = '';
+    });
+</script>
+</body>
+</html>
