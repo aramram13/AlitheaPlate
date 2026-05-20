@@ -479,18 +479,46 @@
                 generationConfig: { responseMimeType: "application/json", temperature: 0.4 }
             };
 
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
-            });
+            // --- AUTO-RETRY ENGINE ---
+            let data;
+            let maxRetries = 3;
+            let delay = 2000; // Start with a 2-second wait
 
-            const data = await response.json();
-            
-            // Safety check: Did the API return an error instead of data?
-            if (!data.candidates) {
-                console.error("RAW API ERROR:", data);
-                throw new Error("The API failed to return nutritional data. It may be overloaded.");
+            for (let i = 0; i < maxRetries; i++) {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                
+                data = await response.json();
+                
+                // If we get candidates, the scan worked! Break out of the retry loop.
+                if (data.candidates) {
+                    break; 
+                } 
+                // If we get a 503 error, wait and try again.
+                else if (data.error && data.error.code === 503) {
+                    console.warn(`API overloaded. Retrying in ${delay/1000}s... (Attempt ${i+1} of ${maxRetries})`);
+                    
+                    // Update the loading screen so the user knows we are trying again
+                    document.querySelector('#screen-loading p').innerText = "Server busy. Auto-retrying...";
+                    document.querySelector('#screen-loading p').classList.add('text-amber-500');
+                    
+                    // Pause the code for the delay time before looping again
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay += 2000; // Add 2 more seconds to the wait time for the next attempt
+                } 
+                // If it is a different kind of error, stop trying immediately.
+                else {
+                    console.error("RAW API ERROR:", data);
+                    throw new Error("The API failed to return nutritional data.");
+                }
+            }
+
+            // Final safety check: if we burned through all retries and STILL don't have data, fail gracefully.
+            if (!data || !data.candidates) {
+                throw new Error("The API is currently too busy. Please try again later.");
             }
 
             const result = JSON.parse(data.candidates[0].content.parts[0].text);
