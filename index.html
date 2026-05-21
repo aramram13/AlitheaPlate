@@ -131,8 +131,7 @@
             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Optional Context / Corrections</label>
             <textarea id="user-context" placeholder="e.g., 'This is a turkey burger, not beef' or 'I used low-sodium soy sauce'" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
         </div>
-
-    <div id="screen-loading" class="p-6 flex flex-col flex-grow justify-center items-center hidden bg-white z-20 absolute inset-0 mt-16">
+    </div> <div id="screen-loading" class="p-6 flex flex-col flex-grow justify-center items-center hidden bg-white z-20 absolute inset-0 mt-16">
         <div class="loader mb-6"></div>
         <h2 class="text-xl font-bold text-gray-800 mb-2">Analyzing image...</h2>
         <p class="text-gray-500 text-sm text-center animate-pulse">Checking ingredients and calculating ratios</p>
@@ -184,6 +183,17 @@
             </div>
         </div>
         
+		<div class="mt-2 mb-6">
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Spot a mistake? Add details and re-scan:</label>
+            <div class="flex gap-2">
+                <textarea id="correction-context" placeholder="e.g., 'The greens are actually spinach, cooked in olive oil'" class="flex-grow bg-white border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
+                <button onclick="processImage()" class="bg-gray-800 hover:bg-gray-900 text-white font-bold px-4 rounded-xl shadow-sm transition-colors text-sm flex flex-col items-center justify-center">
+                    <span class="text-lg">🔄</span>
+                    <span>Retry</span>
+                </button>
+            </div>
+        </div>
+		
         <button id="log-meal-btn" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-6 mb-8 transition-colors">
             Log this Meal
         </button>
@@ -411,9 +421,9 @@
     // Initialize Dashboard on load
     updateDashboard(); 
 
-    async function processImage(event) {
-        // Grab ALL selected files now!
-        const files = Array.from(event.target.files);
+    async function processImage() {
+        // Grab ALL selected files directly from the hidden input element!
+        const files = Array.from(document.getElementById('image-upload').files);
         if (files.length === 0) return;
 
         navigateTo('screen-loading');
@@ -427,8 +437,16 @@
         
         const selectedGoal = Array.from(selectedGoalElements).map(cb => cb.value).join(" AND ");
         const scanMode = document.querySelector('input[name="scan-mode"]:checked').value;
-        // Grab the user's manual text context
-        const userContext = document.getElementById('user-context').value.trim();
+        
+        // Grab text from BOTH the initial context box and the new correction box
+        const initialContext = document.getElementById('user-context').value.trim();
+        const correctionBox = document.getElementById('correction-context');
+        const correctionContext = correctionBox ? correctionBox.value.trim() : "";
+        
+        let userContext = initialContext;
+        if (correctionContext) {
+            userContext += (userContext ? " | Corrections: " : "") + correctionContext;
+        }
 
         const loadingText = document.querySelector('#screen-loading p');
         const loadingMessages = [
@@ -569,6 +587,10 @@
             clearInterval(loadingInterval);
             console.error("Analysis Failed:", error);
             alert("Something went wrong analyzing the image. Check your console!");
+            
+            // FIX: Wipe the file input clean so you can retry the exact same photo immediately
+            document.getElementById('image-upload').value = '';
+            
             navigateTo('screen-capture');
         }
     }
@@ -577,6 +599,8 @@
     document.getElementById('reset-btn').addEventListener('click', () => {
         navigateTo('screen-onboarding');
         document.getElementById('image-upload').value = '';
+        document.getElementById('user-context').value = '';
+        if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
     });
 	// --- LOG MEAL BUTTON LISTENER ---
     document.getElementById('log-meal-btn').addEventListener('click', () => {
@@ -612,6 +636,8 @@
         
         // Reset file input and go to dashboard
         document.getElementById('image-upload').value = '';
+        document.getElementById('user-context').value = '';
+        if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
         navigateTo('screen-onboarding');
     });
 </script>
