@@ -131,6 +131,12 @@
             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Optional Context / Corrections</label>
             <textarea id="user-context" placeholder="e.g., 'This is a turkey burger, not beef' or 'I used low-sodium soy sauce'" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
         </div>
+		<div id="file-preview-container" class="mt-4 w-full max-w-xs text-center hidden">
+            <p id="file-count-text" class="text-sm font-bold text-emerald-700 mb-3">📸 1 image selected</p>
+            <button onclick="processImage()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-md transition-colors">
+                Analyze Meal
+            </button>
+        </div>
     </div> <div id="screen-loading" class="p-6 flex flex-col flex-grow justify-center items-center hidden bg-white z-20 absolute inset-0 mt-16">
         <div class="loader mb-6"></div>
         <h2 class="text-xl font-bold text-gray-800 mb-2">Analyzing image...</h2>
@@ -478,8 +484,10 @@
                 contextInstruction += `\n\nCRITICAL USER CONTEXT TO FACTOR IN: "${userContext}"`;
             }
 
-            const prompt = `You are an expert nutritional coach. The user's dietary focus is: ${selectedGoal}. 
+            const prompt = `You are an empathetic, supportive, and balanced nutritional guide. The user's dietary focus is: ${selectedGoal}. 
             ${contextInstruction}
+
+            Evaluate the meal holistically. Do not be overly critical of minor details if the overall meal is healthy. 
             
             Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
             {
@@ -487,8 +495,8 @@
                 "health_score": number 0-100,
                 "calories": number,
                 "positives": ["positive 1", "positive 2"],
-                "negatives": ["negative 1", "negative 2"],
-                "recommendation": "Highly actionable swap or adjustment"
+                "negatives": ["negative 1", "negative 2 (Leave empty if the meal is great)"],
+                "recommendation": "A gentle, actionable tip ONLY IF needed, otherwise provide encouraging praise for a great choice."
             }`;
 
             // Build the parts array dynamically! 
@@ -595,12 +603,25 @@
         }
     }
 
-    document.getElementById('image-upload').onchange = processImage;
+    // Update the file preview instead of instantly processing
+    document.getElementById('image-upload').addEventListener('change', (e) => {
+        const fileCount = e.target.files.length;
+        const previewContainer = document.getElementById('file-preview-container');
+        const countText = document.getElementById('file-count-text');
+        
+        if (fileCount > 0) {
+            countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
+            previewContainer.classList.remove('hidden');
+        } else {
+            previewContainer.classList.add('hidden');
+        }
+    });
     document.getElementById('reset-btn').addEventListener('click', () => {
         navigateTo('screen-onboarding');
         document.getElementById('image-upload').value = '';
         document.getElementById('user-context').value = '';
         if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
+		document.getElementById('file-preview-container').classList.add('hidden');
     });
 	// --- LOG MEAL BUTTON LISTENER ---
     document.getElementById('log-meal-btn').addEventListener('click', () => {
@@ -638,6 +659,7 @@
         document.getElementById('image-upload').value = '';
         document.getElementById('user-context').value = '';
         if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
+		document.getElementById('file-preview-container').classList.add('hidden');
         navigateTo('screen-onboarding');
     });
 </script>
