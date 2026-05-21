@@ -121,12 +121,16 @@
             </label>
         </div>
 
-        <label class="w-48 h-48 flex flex-col items-center justify-center bg-emerald-50 border-4 border-dashed border-emerald-300 rounded-full cursor-pointer hover:bg-emerald-100 transition-all shadow-sm">
+        <label class="w-48 h-48 flex flex-col items-center justify-center bg-emerald-50 border-4 border-dashed border-emerald-300 rounded-full cursor-pointer hover:bg-emerald-100 transition-all shadow-sm mb-6">
             <span class="text-4xl mb-2">📸</span>
-            <span class="text-emerald-700 font-bold text-sm">Take Photo / Upload</span>
-            <input type="file" accept="image/*" class="hidden">
+            <span class="text-emerald-700 font-bold text-sm text-center px-4">Take Photos / Upload<br><span class="text-xs font-normal text-emerald-600">(You can select multiple!)</span></span>
+            <input type="file" accept="image/*" multiple class="hidden" id="image-upload">
         </label>
-    </div>
+
+        <div class="w-full max-w-xs">
+            <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Optional Context / Corrections</label>
+            <textarea id="user-context" placeholder="e.g., 'This is a turkey burger, not beef' or 'I used low-sodium soy sauce'" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
+        </div>
 
     <div id="screen-loading" class="p-6 flex flex-col flex-grow justify-center items-center hidden bg-white z-20 absolute inset-0 mt-16">
         <div class="loader mb-6"></div>
@@ -408,27 +412,24 @@
     updateDashboard(); 
 
     async function processImage(event) {
-        const file = event.target.files[0];
-        if (!file) return;
+        // Grab ALL selected files now!
+        const files = Array.from(event.target.files);
+        if (files.length === 0) return;
 
-        // 1. Switch to loading screen
         navigateTo('screen-loading');
 
-        // 2. Grab user inputs FIRST so the app doesn't crash
         const selectedGoalElements = document.querySelectorAll('input[name="goal"]:checked');
-        
-        // Safety check in case they uncheck all boxes
         if (selectedGoalElements.length === 0) {
             alert("Please select at least one dietary focus.");
             navigateTo('screen-onboarding');
             return;
         }
         
-        // Combines all checked goals into one string (e.g., "Heart Healthy AND Fitness")
         const selectedGoal = Array.from(selectedGoalElements).map(cb => cb.value).join(" AND ");
-		const scanMode = document.querySelector('input[name="scan-mode"]:checked').value;
+        const scanMode = document.querySelector('input[name="scan-mode"]:checked').value;
+        // Grab the user's manual text context
+        const userContext = document.getElementById('user-context').value.trim();
 
-        // 3. Start the dynamic UX text trick
         const loadingText = document.querySelector('#screen-loading p');
         const loadingMessages = [
             "Scanning image...",
@@ -444,18 +445,21 @@
         }, 2500);
 
         try {
-            // 4. Smart Compression (1600px for text, 800px for photos)
             const resolution = scanMode === 'recipe' ? 1600 : 800;
-            const base64Image = await compressImage(file, resolution);
             const mimeType = "image/jpeg";
-
-            // 5. Dynamic AI Instructions
-            let contextInstruction = scanMode === "meal" 
-                ? "Analyze this photo of a plated meal." 
-                : "Read the text in this image (it is a recipe, ingredient list, or nutrition label). Calculate the approximate nutritional value of one serving based on the text.";
-
-            const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
             
+            // Compress ALL images using a Promise.all loop
+            const base64Images = await Promise.all(files.map(file => compressImage(file, resolution)));
+
+            let contextInstruction = scanMode === "meal" 
+                ? "Analyze the provided photo(s) of a plated meal." 
+                : "Read the text in the provided image(s) (recipe, ingredient list, or label). Calculate the approximate nutritional value of one serving based on the text.";
+
+            // Add the user's manual context if they typed anything
+            if (userContext) {
+                contextInstruction += `\n\nCRITICAL USER CONTEXT TO FACTOR IN: "${userContext}"`;
+            }
+
             const prompt = `You are an expert nutritional coach. The user's dietary focus is: ${selectedGoal}. 
             ${contextInstruction}
             
@@ -463,21 +467,25 @@
             {
                 "meal_identified": "Name of meal or recipe",
                 "health_score": number 0-100,
-				"calories": number,
+                "calories": number,
                 "positives": ["positive 1", "positive 2"],
                 "negatives": ["negative 1", "negative 2"],
                 "recommendation": "Highly actionable swap or adjustment"
             }`;
 
+            // Build the parts array dynamically! 
+            const requestParts = [{ text: prompt }];
+            
+            base64Images.forEach(base64 => {
+                requestParts.push({ inline_data: { mime_type: mimeType, data: base64 } });
+            });
+
             const requestBody = {
-                contents: [{
-                    parts: [
-                        { text: prompt },
-                        { inline_data: { mime_type: mimeType, data: base64Image } }
-                    ]
-                }],
+                contents: [{ parts: requestParts }],
                 generationConfig: { responseMimeType: "application/json", temperature: 0.4 }
             };
+
+            const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
 
             // --- AUTO-RETRY ENGINE ---
             let data;
@@ -565,10 +573,10 @@
         }
     }
 
-    document.querySelector('input[type="file"]').onchange = processImage;
+    document.getElementById('image-upload').onchange = processImage;
     document.getElementById('reset-btn').addEventListener('click', () => {
         navigateTo('screen-onboarding');
-        document.querySelector('input[type="file"]').value = '';
+        document.getElementById('image-upload').value = '';
     });
 	// --- LOG MEAL BUTTON LISTENER ---
     document.getElementById('log-meal-btn').addEventListener('click', () => {
@@ -603,7 +611,7 @@
         updateDashboard();
         
         // Reset file input and go to dashboard
-        document.querySelector('input[type="file"]').value = '';
+        document.getElementById('image-upload').value = '';
         navigateTo('screen-onboarding');
     });
 </script>
