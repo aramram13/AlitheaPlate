@@ -32,6 +32,9 @@
         <button id="reset-btn" class="hidden bg-yellow-600 hover:bg-yellow-500 text-black text-sm font-bold py-1.5 px-4 rounded-lg transition-colors">
             Return
         </button>
+		<button onclick="openProfileModal()" class="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 text-sm font-bold py-1.5 px-4 rounded-lg transition-colors ml-2">
+            ⚙️ Profile
+        </button>
     </header>
 
     <div id="screen-onboarding" class="p-6 flex flex-col flex-grow">
@@ -95,7 +98,12 @@
                 </div>
             </div>
 
-            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider mb-3">Today's Meals</h3>
+            <div class="flex justify-between items-center mb-3">
+                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Meals</h3>
+                <button onclick="openWorkoutModal()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
+                    + Log Workout
+                </button>
+            </div>
             <div id="history-container" class="space-y-2 overflow-y-auto max-h-48 pb-4">
                 <p class="text-xs text-gray-400 italic">No meals scanned yet.</p>
             </div>
@@ -204,7 +212,97 @@
             Log this Meal
         </button>
         
-    </div> <div id="meal-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
+    </div><div id="workout-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            
+            <div id="workout-loading" class="hidden absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center sm:rounded-2xl rounded-t-2xl">
+                <div class="loader mb-4"></div>
+                <p class="text-gray-800 font-bold animate-pulse">Calculating Calorie Burn...</p>
+            </div>
+
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black text-gray-800">Log Workout</h2>
+                <button onclick="closeWorkoutModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">What did you do? (Include Duration)</label>
+                    <textarea id="workout-description" placeholder="e.g., '10 minutes on the stair climber and 15 minutes in the sauna at the YMCA'" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-blue-500 resize-none shadow-sm" rows="3"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Perceived Intensity</label>
+                    <div class="flex gap-2">
+                        <label class="flex-1 text-center relative">
+                            <input type="radio" name="workout-intensity" value="Light" class="peer hidden">
+                            <div class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-gray-50 border border-gray-200 text-gray-500 font-semibold text-xs py-2 rounded-lg cursor-pointer transition-all">Light</div>
+                        </label>
+                        <label class="flex-1 text-center relative">
+                            <input type="radio" name="workout-intensity" value="Moderate" checked class="peer hidden">
+                            <div class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-gray-50 border border-gray-200 text-gray-500 font-semibold text-xs py-2 rounded-lg cursor-pointer transition-all">Moderate</div>
+                        </label>
+                        <label class="flex-1 text-center relative">
+                            <input type="radio" name="workout-intensity" value="Vigorous" class="peer hidden">
+                            <div class="peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 bg-gray-50 border border-gray-200 text-gray-500 font-semibold text-xs py-2 rounded-lg cursor-pointer transition-all">Vigorous</div>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <button onclick="calculateWorkout()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl mt-8 shadow-md transition-colors">
+                Calculate Burn
+            </button>
+        </div>
+    </div>
+	
+	<div id="profile-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
+        <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black text-gray-800">Your Profile</h2>
+                <button onclick="closeProfileModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
+            </div>
+            
+            <p class="text-xs text-gray-500 mb-6 italic">This data is stored locally on your device and is used by the AI to calculate your baseline metabolic rate and exercise calorie burn.</p>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Age</label>
+                    <input type="number" id="profile-age" placeholder="e.g., 30" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                </div>
+                
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Height (Feet)</label>
+                        <input type="number" id="profile-feet" placeholder="e.g., 5" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Inches</label>
+                        <input type="number" id="profile-inches" placeholder="e.g., 10" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Current Weight (lbs)</label>
+                    <input type="number" id="profile-weight" placeholder="e.g., 165" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Biological Sex (For BMR Math)</label>
+                    <select id="profile-sex" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 appearance-none">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+            </div>
+            
+            <button onclick="saveProfile()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl mt-8 shadow-md transition-colors">
+                Save Profile
+            </button>
+        </div>
+    </div>
+	
+	<div id="meal-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
         <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-start mb-4">
                 <div>
@@ -375,6 +473,141 @@
 
     window.closeMealModal = function() {
         document.getElementById('meal-modal').classList.add('hidden');
+    };
+	
+	// --- WORKOUT MODAL LOGIC ---
+    window.openWorkoutModal = function() {
+        document.getElementById('workout-description').value = '';
+        document.getElementById('workout-loading').classList.add('hidden');
+        document.getElementById('workout-modal').classList.remove('hidden');
+    };
+
+    window.closeWorkoutModal = function() {
+        document.getElementById('workout-modal').classList.add('hidden');
+    };
+	
+	window.calculateWorkout = async function() {
+        const description = document.getElementById('workout-description').value.trim();
+        const intensity = document.querySelector('input[name="workout-intensity"]:checked').value;
+        
+        if (!description) {
+            alert("Please describe your workout so the AI can calculate the burn!");
+            return;
+        }
+
+        // 1. Get User Profile for baseline math (with fallbacks if empty)
+        const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
+        const userAge = profile.age || "30"; 
+        const userWeight = profile.weight || "165";
+        const userSex = profile.sex || "male";
+
+        // 2. Show loading state
+        document.getElementById('workout-loading').classList.remove('hidden');
+
+        // 3. Build the specific fitness prompt
+        const fitnessPrompt = `You are an expert personal trainer and metabolic calculator. 
+        The user's current profile is: Age ${userAge}, Weight ${userWeight} lbs, Biological Sex: ${userSex}.
+
+        The user just completed the following workout: 
+        Activity: "${description}"
+        Perceived Intensity: ${intensity}
+
+        Calculate the estimated calories burned using standard Metabolic Equivalent of Task (MET) formulas based on their weight and the duration of the activity. 
+
+        Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
+        {
+            "calories_burned": number,
+            "workout_summary": "A brief 3-5 word title",
+            "feedback": "A short, encouraging sentence about this specific workout."
+        }`;
+
+        const requestBody = {
+            contents: [{ parts: [{ text: fitnessPrompt }] }],
+            generationConfig: { responseMimeType: "application/json", temperature: 0.2 }
+        };
+
+        const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
+
+        try {
+            // Reusing your awesome auto-retry engine for server stability!
+            let data;
+            let maxRetries = 3;
+            let delay = 2000;
+
+            for (let i = 0; i < maxRetries; i++) {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(requestBody)
+                });
+                data = await response.json();
+                if (data.candidates) break;
+                
+                if (data.error && data.error.code === 503) {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    delay += 2000;
+                } else {
+                    throw new Error("API Error");
+                }
+            }
+
+            if (!data || !data.candidates) throw new Error("API Timeout");
+
+            const result = JSON.parse(data.candidates[0].content.parts[0].text);
+
+            // 4. Update Daily Storage
+            const todayStr = new Date().toLocaleDateString();
+            let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+            if (!dailyData[todayStr]) dailyData[todayStr] = { meals: [], exercise: 0 };
+            
+            // Add the new calories to whatever was already there
+            const currentExercise = parseInt(dailyData[todayStr].exercise) || 0;
+            dailyData[todayStr].exercise = currentExercise + result.calories_burned;
+            
+            localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+
+            // 5. Update UI & Clean up
+            updateDashboard();
+            closeWorkoutModal();
+            alert(`Great job! You burned approx. ${result.calories_burned} calories.\n\nAI Coach says: ${result.feedback}`);
+
+        } catch (error) {
+            console.error("Workout Analysis Failed:", error);
+            alert("Something went wrong calculating your workout. Check your internet connection.");
+        } finally {
+            document.getElementById('workout-loading').classList.add('hidden');
+        }
+    };
+	
+	// --- PROFILE MODAL LOGIC ---
+    window.openProfileModal = function() {
+        // Load existing data if it exists
+        const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
+        if (profile.age) document.getElementById('profile-age').value = profile.age;
+        if (profile.feet) document.getElementById('profile-feet').value = profile.feet;
+        if (profile.inches) document.getElementById('profile-inches').value = profile.inches;
+        if (profile.weight) document.getElementById('profile-weight').value = profile.weight;
+        if (profile.sex) document.getElementById('profile-sex').value = profile.sex;
+        
+        document.getElementById('profile-modal').classList.remove('hidden');
+    };
+
+    window.closeProfileModal = function() {
+        document.getElementById('profile-modal').classList.add('hidden');
+    };
+
+    window.saveProfile = function() {
+        const profile = {
+            age: document.getElementById('profile-age').value,
+            feet: document.getElementById('profile-feet').value,
+            inches: document.getElementById('profile-inches').value,
+            weight: document.getElementById('profile-weight').value,
+            sex: document.getElementById('profile-sex').value
+        };
+        
+        localStorage.setItem('alitheaplate_profile', JSON.stringify(profile));
+        closeProfileModal();
+        alert("Profile saved successfully! This data will be used for future fitness calculations.");
     };
 	
 	// --- DELETE MEAL LOGIC ---
