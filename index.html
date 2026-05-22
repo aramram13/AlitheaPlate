@@ -55,7 +55,8 @@
     <!-- SCREEN: WELCOME / GOALS -->
     <div id="screen-welcome" class="p-6 flex flex-col flex-grow pb-28">
         <h2 class="text-3xl font-extrabold mb-2 text-gray-900">Welcome! 👋</h2>
-        <p class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
+        <p id="welcome-message" class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
+		<p class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
         
         <div class="space-y-3 mb-8">
             <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
@@ -83,6 +84,7 @@
 
     <!-- SCREEN: DASHBOARD -->
     <div id="screen-dashboard" class="p-4 flex flex-col flex-grow hidden pb-28">
+        <p id="dashboard-message" class="text-emerald-700 font-bold mb-2"></p>
         <div class="flex justify-between items-center mb-3">
             <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Dashboard</h3>
             <div class="flex items-center gap-2">
@@ -91,7 +93,7 @@
                 <button id="next-day-btn" class="text-gray-300 font-bold px-3 py-1 rounded bg-gray-50 cursor-not-allowed" disabled>&gt;</button>
             </div>
         </div>
-        
+		
         <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
             <div class="flex justify-between items-end mb-4">
                 <div>
@@ -1197,11 +1199,16 @@
     // Initialize App on load
     window.onload = () => {
         let dailyData = localStorage.getItem('alitheaplate_daily');
+        
         if (dailyData) {
-            // Returning user: Go straight to dashboard
+            // Returning user: Set dashboard greeting and go to dashboard
+            const dashMsg = document.getElementById('dashboard-message');
+            if (dashMsg) dashMsg.innerText = "Welcome back. Let’s find the truth in today’s progress.";
             navigateTo('screen-dashboard');
         } else {
-            // First time user: Show welcome screen
+            // First time user: Set welcome greeting and go to welcome screen
+            const welcomeMsg = document.getElementById('welcome-message');
+            if (welcomeMsg) welcomeMsg.innerText = "Welcome to Alithea Wellness! Named for the Greek word for 'Truth,' we’re here to help you uncover the reality behind your fitness and nutrition goals, through data you can trust!";
             navigateTo('screen-welcome');
         }
     }; 
