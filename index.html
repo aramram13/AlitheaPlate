@@ -831,16 +831,23 @@
 	
 	// --- WORKOUT MODAL LOGIC ---
     let pendingWorkout = null;
+    let workoutFilesArray = []; // Accumulates photos across multiple clicks
 
     document.getElementById('workout-image-upload').addEventListener('change', (e) => {
-        const fileCount = e.target.files.length;
+        // Append new files to our array instead of overwriting
+        const newFiles = Array.from(e.target.files);
+        workoutFilesArray = workoutFilesArray.concat(newFiles);
+        
         const countText = document.getElementById('workout-file-count');
-        if (fileCount > 0) {
-            countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} attached.`;
+        if (workoutFilesArray.length > 0) {
+            countText.innerText = `📸 ${workoutFilesArray.length} image${workoutFilesArray.length > 1 ? 's' : ''} attached.`;
             countText.classList.remove('hidden');
         } else {
             countText.classList.add('hidden');
         }
+        
+        // Reset the input so clicking it again works smoothly
+        e.target.value = '';
     });
 
     window.openWorkoutModal = function() {
@@ -854,6 +861,7 @@
         document.getElementById('workout-loading').classList.add('hidden');
 
         pendingWorkout = null;
+        workoutFilesArray = []; // Clear old photos when opening a fresh log
         document.getElementById('workout-modal').classList.remove('hidden');
     };
 
@@ -864,7 +872,8 @@
     window.calculateWorkout = async function(isRetry = false) {
         const description = document.getElementById('workout-description').value.trim();
         const intensity = document.querySelector('input[name="workout-intensity"]:checked').value;
-        const files = Array.from(document.getElementById('workout-image-upload').files);
+        
+        const files = workoutFilesArray; // Use the accumulated array, not the HTML input
         
         if (!description && files.length === 0) {
             alert("Please describe your activity or attach an image so the AI can calculate the burn!");
