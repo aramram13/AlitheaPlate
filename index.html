@@ -25,20 +25,35 @@
 
 <div class="max-w-md mx-auto bg-white min-h-screen flex flex-col shadow-xl overflow-hidden relative">
 
-    <header class="bg-black text-white p-4 flex justify-between items-center shadow-md z-10 relative border-b-2 border-yellow-600/30">
+    <header class="bg-black text-white p-4 flex justify-center items-center shadow-md z-10 relative border-b-2 border-yellow-600/30">
         <div class="flex items-center gap-3">
-            <img src="Logo.png" alt="AlitheaPlate Logo" class="w-10 h-10 object-contain rounded">
+            <img src="Logo.png" alt="Alithea Wellness Logo" class="w-10 h-10 object-contain rounded">
             <h1 class="font-black text-xl tracking-widest text-yellow-500 uppercase font-serif">Alithea Wellness</h1>
         </div>
-        <button id="reset-btn" class="hidden bg-yellow-600 hover:bg-yellow-500 text-black text-sm font-bold py-1.5 px-4 rounded-lg transition-colors">
-            Return
-        </button>
-		<button onclick="openProfileModal()" class="bg-gray-800 hover:bg-gray-700 text-white border border-gray-600 text-sm font-bold py-1.5 px-4 rounded-lg transition-colors ml-2">
-            ⚙️ Profile
-        </button>
     </header>
 
-    <div id="screen-onboarding" class="p-6 flex flex-col flex-grow">
+    <!-- NEW BOTTOM NAV BAR -->
+    <nav id="bottom-nav" class="bg-white border-t border-gray-200 flex justify-around items-center pb-6 pt-2 px-2 fixed bottom-0 w-full max-w-md mx-auto z-40 hidden shadow-[0_-4px_10px_rgba(0,0,0,0.05)]">
+        <button onclick="navigateTo('screen-dashboard')" id="nav-btn-dashboard" class="flex flex-col items-center p-2 text-indigo-600 transition-colors w-1/3">
+            <span class="text-2xl mb-1">📊</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Dashboard</span>
+        </button>
+        
+        <button onclick="navigateTo('screen-capture')" id="nav-btn-capture" class="flex flex-col items-center justify-center text-gray-400 hover:text-emerald-600 transition-colors w-1/3 relative -top-5">
+            <div class="bg-emerald-500 hover:bg-emerald-600 transition-colors rounded-full p-3 shadow-lg text-white mb-1 border-4 border-white">
+                <span class="text-3xl">📸</span>
+            </div>
+            <span class="text-[10px] font-bold uppercase tracking-wider relative -top-1">Scan / Log</span>
+        </button>
+        
+        <button onclick="openProfileModal()" id="nav-btn-profile" class="flex flex-col items-center p-2 text-gray-400 hover:text-indigo-600 transition-colors w-1/3">
+            <span class="text-2xl mb-1">⚙️</span>
+            <span class="text-[10px] font-bold uppercase tracking-wider">Profile</span>
+        </button>
+    </nav>
+
+    <!-- SCREEN: WELCOME / GOALS -->
+    <div id="screen-welcome" class="p-6 flex flex-col flex-grow pb-28">
         <h2 class="text-3xl font-extrabold mb-2 text-gray-900">Welcome! 👋</h2>
         <p class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
         
@@ -61,80 +76,80 @@
             </label>
         </div>
 
-        <button onclick="navigateTo('screen-capture')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-auto transition-colors">
-            Get Started
+        <button onclick="saveGoalsAndEnter()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-auto transition-colors">
+            Save & Go to Dashboard
         </button>
+    </div>
 
-        <div class="mt-8 pt-6 border-t border-gray-100 flex-grow">
-           <div class="flex justify-between items-center mb-3">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Dashboard</h3>
-                <div class="flex items-center gap-2">
-                    <button id="prev-day-btn" class="text-gray-500 hover:text-emerald-600 font-bold px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors">&lt;</button>
-                    <span id="current-date-display" class="text-xs font-bold text-gray-700 w-20 text-center">Today</span>
-                    <button id="next-day-btn" class="text-gray-300 font-bold px-3 py-1 rounded bg-gray-50 cursor-not-allowed" disabled>&gt;</button>
+    <!-- SCREEN: DASHBOARD -->
+    <div id="screen-dashboard" class="p-4 flex flex-col flex-grow hidden pb-28">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Dashboard</h3>
+            <div class="flex items-center gap-2">
+                <button id="prev-day-btn" class="text-gray-500 hover:text-emerald-600 font-bold px-3 py-1 rounded bg-gray-100 hover:bg-gray-200 transition-colors">&lt;</button>
+                <span id="current-date-display" class="text-xs font-bold text-gray-700 w-20 text-center">Today</span>
+                <button id="next-day-btn" class="text-gray-300 font-bold px-3 py-1 rounded bg-gray-50 cursor-not-allowed" disabled>&gt;</button>
+            </div>
+        </div>
+        
+        <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
+            <div class="flex justify-between items-end mb-4">
+                <div>
+                    <p class="text-xs font-bold text-gray-500 uppercase">Daily Goal</p>
+                    <input type="number" id="daily-goal-input" placeholder="2000" class="w-24 bg-white border border-gray-300 rounded px-2 py-1 text-lg font-black text-gray-800 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div class="text-right">
+                    <p class="text-xs font-bold text-gray-500 uppercase">Remaining</p>
+                    <p id="calories-remaining" class="text-3xl font-black text-emerald-600">0</p>
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-200 shadow-sm">
-                <div class="flex justify-between items-end mb-4">
-                    <div>
-                        <p class="text-xs font-bold text-gray-500 uppercase">Daily Goal</p>
-                        <input type="number" id="daily-goal-input" placeholder="2000" class="w-24 bg-white border border-gray-300 rounded px-2 py-1 text-lg font-black text-gray-800 focus:outline-none focus:border-emerald-500">
-                    </div>
-                    <div class="text-right">
-                        <p class="text-xs font-bold text-gray-500 uppercase">Remaining</p>
-                        <p id="calories-remaining" class="text-3xl font-black text-emerald-600">0</p>
-                    </div>
+            <div class="flex justify-between text-sm mb-2 px-2">
+                <div class="text-center">
+                    <p class="text-gray-500 font-medium text-xs uppercase">Food</p>
+                    <p id="calories-food" class="font-bold text-gray-800 text-lg">0</p>
                 </div>
-                
-                <div class="flex justify-between text-sm mb-2 px-2">
-                    <div class="text-center">
-                        <p class="text-gray-500 font-medium text-xs uppercase">Food</p>
-                        <p id="calories-food" class="font-bold text-gray-800 text-lg">0</p>
-                    </div>
-                    <div class="text-center">
-                        <p class="text-gray-500 font-medium text-xs uppercase">Burned</p>
-                        <input type="number" id="daily-exercise-input" placeholder="0" class="w-16 bg-white border border-gray-300 rounded px-1 py-1 text-center font-bold text-blue-600 focus:outline-none focus:border-blue-500">
-                    </div>
-                </div>
-                
-                <div class="mt-4 pt-4 border-t border-gray-200">
-                    
-                    <div class="flex justify-between items-center mb-2 px-2">
-                        <p class="text-xs font-bold text-gray-500 uppercase">Weight Trend</p>
-                        <div class="flex bg-gray-100 rounded-lg p-0.5">
-                            <button id="chart-scope-week" class="px-2 py-1 text-[10px] font-bold rounded-md bg-white text-indigo-600 shadow-sm transition-all">1W</button>
-                            <button id="chart-scope-month" class="px-2 py-1 text-[10px] font-bold rounded-md text-gray-500 hover:text-indigo-600 transition-all">1M</button>
-                            <button id="chart-scope-year" class="px-2 py-1 text-[10px] font-bold rounded-md text-gray-500 hover:text-indigo-600 transition-all">1Y</button>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-between items-center mb-3 px-2">
-                        <button id="chart-prev-btn" class="text-gray-400 hover:text-indigo-600 font-bold px-2 py-0.5 rounded bg-gray-50 hover:bg-indigo-50 transition-colors">&lt;</button>
-                        <span id="chart-date-label" class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Last 7 Days</span>
-                        <button id="chart-next-btn" class="text-gray-400 hover:text-indigo-600 font-bold px-2 py-0.5 rounded bg-gray-50 hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent" disabled>&gt;</button>
-                    </div>
-
-                    <div class="flex justify-between items-center mb-3 px-2">
-                        <p class="text-xs font-medium text-gray-500">Morning Weight (lbs)</p>
-                        <input type="number" id="daily-weight-input" placeholder="e.g., 165" class="w-20 bg-white border border-gray-300 rounded px-2 py-1 text-center font-bold text-indigo-600 focus:outline-none focus:border-indigo-500">
-                    </div>
-
-                    <div class="w-full h-32 relative">
-                        <canvas id="weightChart"></canvas>
-                    </div>
+                <div class="text-center">
+                    <p class="text-gray-500 font-medium text-xs uppercase">Burned</p>
+                    <input type="number" id="daily-exercise-input" placeholder="0" class="w-16 bg-white border border-gray-300 rounded px-1 py-1 text-center font-bold text-blue-600 focus:outline-none focus:border-blue-500">
                 </div>
             </div>
+            
+            <div class="mt-4 pt-4 border-t border-gray-200">
+                <div class="flex justify-between items-center mb-2 px-2">
+                    <p class="text-xs font-bold text-gray-500 uppercase">Weight Trend</p>
+                    <div class="flex bg-gray-100 rounded-lg p-0.5">
+                        <button id="chart-scope-week" class="px-2 py-1 text-[10px] font-bold rounded-md bg-white text-indigo-600 shadow-sm transition-all">1W</button>
+                        <button id="chart-scope-month" class="px-2 py-1 text-[10px] font-bold rounded-md text-gray-500 hover:text-indigo-600 transition-all">1M</button>
+                        <button id="chart-scope-year" class="px-2 py-1 text-[10px] font-bold rounded-md text-gray-500 hover:text-indigo-600 transition-all">1Y</button>
+                    </div>
+                </div>
 
-            <div class="flex justify-between items-center mb-3">
-                <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Activity</h3>
-                <button onclick="openWorkoutModal()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
-                    + Log Workout
-                </button>
+                <div class="flex justify-between items-center mb-3 px-2">
+                    <button id="chart-prev-btn" class="text-gray-400 hover:text-indigo-600 font-bold px-2 py-0.5 rounded bg-gray-50 hover:bg-indigo-50 transition-colors">&lt;</button>
+                    <span id="chart-date-label" class="text-[10px] font-bold text-gray-400 uppercase tracking-wider">Last 7 Days</span>
+                    <button id="chart-next-btn" class="text-gray-400 hover:text-indigo-600 font-bold px-2 py-0.5 rounded bg-gray-50 hover:bg-indigo-50 transition-colors disabled:opacity-30 disabled:hover:bg-transparent" disabled>&gt;</button>
+                </div>
+
+                <div class="flex justify-between items-center mb-3 px-2">
+                    <p class="text-xs font-medium text-gray-500">Morning Weight (lbs)</p>
+                    <input type="number" id="daily-weight-input" placeholder="e.g., 165" class="w-20 bg-white border border-gray-300 rounded px-2 py-1 text-center font-bold text-indigo-600 focus:outline-none focus:border-indigo-500">
+                </div>
+
+                <div class="w-full h-32 relative">
+                    <canvas id="weightChart"></canvas>
+                </div>
             </div>
-            <div id="history-container" class="space-y-2 overflow-y-auto max-h-48 pb-4">
-                <p class="text-xs text-gray-400 italic">No meals scanned yet.</p>
-            </div>
+        </div>
+
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Activity</h3>
+            <button onclick="openWorkoutModal()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
+                + Log Workout
+            </button>
+        </div>
+        <div id="history-container" class="space-y-2 overflow-y-auto max-h-48 pb-4">
+            <p class="text-xs text-gray-400 italic">No activity logged yet.</p>
         </div>
     </div>
 
@@ -240,23 +255,24 @@
             Log this Meal
         </button>
         
-    </div><div id="workout-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
-        <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl relative">
+    </div><div id="workout-modal" class="hidden fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full sm:w-11/12 rounded-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl relative">
             
-            <div id="workout-loading" class="hidden absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center sm:rounded-2xl rounded-t-2xl">
+            <div id="workout-loading" class="hidden absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center rounded-2xl">
                 <div class="loader mb-4"></div>
                 <p class="text-gray-800 font-bold animate-pulse">Calculating Calorie Burn...</p>
             </div>
 
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-xl font-black text-gray-800">Log Workout</h2>
+                <h2 class="text-xl font-black text-gray-800">Log Activity</h2>
                 <button onclick="closeWorkoutModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
             </div>
 
-            <div class="space-y-4">
+            <!-- STEP 1: INPUT SECTION -->
+            <div id="workout-input-section" class="space-y-4">
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-2">What did you do? (Include Duration)</label>
-                    <textarea id="workout-description" placeholder="e.g., '10 minutes on the stair climber and 15 minutes in the sauna at the YMCA'" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-blue-500 resize-none shadow-sm" rows="3"></textarea>
+                    <textarea id="workout-description" placeholder="e.g., '10 minutes on the stair climber' or 'Spent an hour cleaning the garage'" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-blue-500 resize-none shadow-sm" rows="3"></textarea>
                 </div>
 
                 <div>
@@ -276,15 +292,59 @@
                         </label>
                     </div>
                 </div>
+
+                <div>
+                    <label class="w-full flex items-center justify-center bg-blue-50 border-2 border-dashed border-blue-300 rounded-xl p-4 cursor-pointer hover:bg-blue-100 transition-all shadow-sm">
+                        <span class="text-2xl mb-1 mr-3">📸</span>
+                        <span class="text-blue-700 font-bold text-sm text-left">Optional Photo<br><span class="text-xs font-normal text-blue-600">(Workout equipment, image of activity, etc.)</span></span>
+                        <input type="file" accept="image/*" multiple class="hidden" id="workout-image-upload">
+                    </label>
+                    <p id="workout-file-count" class="text-xs text-blue-600 font-bold hidden mt-2 text-center"></p>
+                </div>
+
+                <button onclick="calculateWorkout()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl mt-4 shadow-md transition-colors">
+                    Calculate Burn
+                </button>
             </div>
-            
-            <button onclick="calculateWorkout()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl mt-8 shadow-md transition-colors">
-                Calculate Burn
-            </button>
+
+            <!-- STEP 2: RESULT & RETRY SECTION -->
+            <div id="workout-result-section" class="hidden space-y-4">
+                <div class="bg-blue-50 rounded-2xl p-5 mb-2 flex justify-between items-center shadow-sm border border-blue-100">
+                    <div class="pr-4">
+                        <h2 class="text-2xl font-black text-blue-800 mb-1 leading-tight">Calculation</h2>
+                        <p id="workout-result-summary" class="text-blue-700 text-sm font-medium">Activity Summary</p>
+                    </div>
+                    <div class="text-right">
+                        <span id="workout-result-calories" class="text-4xl font-black text-gray-800">0</span>
+                        <p class="text-xs font-bold text-gray-500 uppercase">cal burned</p>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-3 border border-gray-200">
+                    <h3 class="flex items-center font-bold text-blue-700 mb-1 uppercase tracking-wide text-xs">💡 AI Coach Feedback</h3>
+                    <p id="workout-result-feedback" class="text-gray-700 text-sm font-medium"></p>
+                </div>
+
+                <div class="mt-4 pt-4 border-t border-gray-100">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Spot a mistake? Add details and recalculate:</label>
+                    <div class="flex gap-2">
+                        <textarea id="workout-correction" placeholder="e.g., 'I carried heavy boxes while cleaning'" class="flex-grow bg-gray-50 border border-gray-300 rounded-xl px-3 py-2 text-sm text-gray-800 focus:outline-none focus:border-blue-500 resize-none shadow-sm" rows="2"></textarea>
+                        <button onclick="calculateWorkout(true)" class="bg-gray-800 hover:bg-gray-900 text-white font-bold px-4 rounded-xl shadow-sm transition-colors text-sm flex flex-col items-center justify-center">
+                            <span class="text-lg">🔄</span>
+                            <span>Retry</span>
+                        </button>
+                    </div>
+                </div>
+
+                <button onclick="logFinalWorkout()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-4 transition-colors">
+                    Log this Activity
+                </button>
+            </div>
+
         </div>
     </div>
 	
-	<div id="profile-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
+	<div id="profile-modal" class="hidden fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-xl font-black text-gray-800">Your Profile</h2>
@@ -324,6 +384,29 @@
                 </div>
             </div>
             
+            <!-- DIETARY GOALS SECTION -->
+            <div class="mb-6">
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Dietary Focus</label>
+                <div id="profile-goals-container" class="space-y-2">
+                    <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500">
+                        <input type="checkbox" name="profile-goal" value="General Healthy / Balanced Eating" class="w-4 h-4 text-emerald-600">
+                        <span class="ml-2 text-sm text-gray-700">General Healthy / Balanced</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500">
+                        <input type="checkbox" name="profile-goal" value="Heart Healthy (Low Sodium/Lower Fat)" class="w-4 h-4 text-emerald-600">
+                        <span class="ml-2 text-sm text-gray-700">Heart Healthy</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500">
+                        <input type="checkbox" name="profile-goal" value="Fitness & High Protein" class="w-4 h-4 text-emerald-600">
+                        <span class="ml-2 text-sm text-gray-700">Fitness & High Protein</span>
+                    </label>
+                    <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500">
+                        <input type="checkbox" name="profile-goal" value="Diabetic (Blood Sugar, Low Glycemic, & Carb Focus)" class="w-4 h-4 text-emerald-600">
+                        <span class="ml-2 text-sm text-gray-700">Diabetic Focus</span>
+                    </label>
+                </div>
+            </div>
+
             <div class="mt-8 pt-6 border-t border-gray-200">
                 <h3 class="text-xs font-bold text-gray-500 uppercase mb-3">Data Backup & Migration</h3>
                 <div class="flex gap-3">
@@ -343,7 +426,7 @@
         </div>
     </div>
 	
-	<div id="meal-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
+	<div id="meal-modal" class="hidden fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl">
             <div class="flex justify-between items-start mb-4">
                 <div>
@@ -382,7 +465,7 @@
                 Close
             </button>
         </div>
-		</div><div id="workout-detail-modal" class="hidden absolute inset-0 bg-gray-900/60 z-50 flex items-end sm:items-center justify-center">
+		</div><div id="workout-detail-modal" class="hidden fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4">
         <div class="bg-white w-full sm:w-11/12 sm:rounded-2xl rounded-t-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl relative">
             <div class="flex justify-between items-start mb-4">
                 <div>
@@ -417,17 +500,63 @@
 <script>
 
     function navigateTo(screenId) {
-        ['screen-onboarding', 'screen-capture', 'screen-loading', 'screen-results'].forEach(id => {
-            document.getElementById(id).classList.add('hidden');
+        // Hide all major screens
+        ['screen-welcome', 'screen-dashboard', 'screen-capture', 'screen-loading', 'screen-results'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) el.classList.add('hidden');
         });
-        document.getElementById(screenId).classList.remove('hidden');
-        if (screenId === 'screen-results' || screenId === 'screen-capture') {
-            document.getElementById('reset-btn').classList.remove('hidden');
+        
+        // Show the requested screen
+        const targetEl = document.getElementById(screenId);
+        if(targetEl) targetEl.classList.remove('hidden');
+
+        // Manage Bottom Navigation visibility
+        const bottomNav = document.getElementById('bottom-nav');
+        if (screenId === 'screen-welcome') {
+            bottomNav.classList.add('hidden');
         } else {
-            document.getElementById('reset-btn').classList.add('hidden');
-            updateDashboard(); 
+            bottomNav.classList.remove('hidden');
+        }
+
+        // Highlight the active button
+        const dashBtn = document.getElementById('nav-btn-dashboard');
+        const scanBtn = document.getElementById('nav-btn-capture');
+        
+        if (dashBtn && scanBtn) {
+            dashBtn.classList.toggle('text-indigo-600', screenId === 'screen-dashboard');
+            dashBtn.classList.toggle('text-gray-400', screenId !== 'screen-dashboard');
+            
+            // Keep scan button highlighted during loading/results too
+            const isScanning = ['screen-capture', 'screen-loading', 'screen-results'].includes(screenId);
+            scanBtn.classList.toggle('text-emerald-600', isScanning);
+            scanBtn.classList.toggle('text-gray-400', !isScanning);
+        }
+
+        // Screen-specific behaviors
+        if (screenId === 'screen-dashboard') {
+            updateDashboard();
+        } else if (screenId === 'screen-capture') {
+            // Reset the scan form when opening camera
+            const imgUpload = document.getElementById('image-upload');
+            if (imgUpload) imgUpload.value = '';
+            const userCtx = document.getElementById('user-context');
+            if (userCtx) userCtx.value = '';
+            const filePreview = document.getElementById('file-preview-container');
+            if (filePreview) filePreview.classList.add('hidden');
         }
     }
+
+    window.saveGoalsAndEnter = function() {
+        // 1. Get all checked checkboxes
+        const selectedGoals = Array.from(document.querySelectorAll('input[name="goal"]:checked'))
+            .map(cb => cb.value);
+        
+        // 2. Save them to localStorage
+        localStorage.setItem('alitheaplate_goals', JSON.stringify(selectedGoals));
+        
+        // 3. Move to dashboard
+        navigateTo('screen-dashboard');
+    };
 
     function compressImage(file, maxWidth) {
         return new Promise((resolve, reject) => {
@@ -701,60 +830,95 @@
     };
 	
 	// --- WORKOUT MODAL LOGIC ---
+    let pendingWorkout = null;
+
+    document.getElementById('workout-image-upload').addEventListener('change', (e) => {
+        const fileCount = e.target.files.length;
+        const countText = document.getElementById('workout-file-count');
+        if (fileCount > 0) {
+            countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} attached.`;
+            countText.classList.remove('hidden');
+        } else {
+            countText.classList.add('hidden');
+        }
+    });
+
     window.openWorkoutModal = function() {
         document.getElementById('workout-description').value = '';
+        document.getElementById('workout-image-upload').value = '';
+        document.getElementById('workout-file-count').classList.add('hidden');
+        document.getElementById('workout-correction').value = '';
+
+        document.getElementById('workout-input-section').classList.remove('hidden');
+        document.getElementById('workout-result-section').classList.add('hidden');
         document.getElementById('workout-loading').classList.add('hidden');
+
+        pendingWorkout = null;
         document.getElementById('workout-modal').classList.remove('hidden');
     };
 
     window.closeWorkoutModal = function() {
         document.getElementById('workout-modal').classList.add('hidden');
     };
-	
-	window.calculateWorkout = async function() {
+
+    window.calculateWorkout = async function(isRetry = false) {
         const description = document.getElementById('workout-description').value.trim();
         const intensity = document.querySelector('input[name="workout-intensity"]:checked').value;
+        const files = Array.from(document.getElementById('workout-image-upload').files);
         
-        if (!description) {
-            alert("Please describe your workout so the AI can calculate the burn!");
+        if (!description && files.length === 0) {
+            alert("Please describe your activity or attach an image so the AI can calculate the burn!");
             return;
         }
 
-        // 1. Get User Profile for baseline math (with fallbacks if empty)
+        document.getElementById('workout-loading').classList.remove('hidden');
+
+        // Build the core context string
+        let context = `Activity: "${description}"\nPerceived Intensity: ${intensity}`;
+        
+        if (isRetry) {
+            const correction = document.getElementById('workout-correction').value.trim();
+            if (correction) {
+                context += `\n\nCRITICAL USER CORRECTION: "${correction}"`;
+            }
+        }
+
         const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
         const userAge = profile.age || "30"; 
         const userWeight = profile.weight || "165";
         const userSex = profile.sex || "male";
 
-        // 2. Show loading state
-        document.getElementById('workout-loading').classList.remove('hidden');
-
-        // 3. Build the specific fitness prompt
         const fitnessPrompt = `You are an expert personal trainer and metabolic calculator. 
         The user's current profile is: Age ${userAge}, Weight ${userWeight} lbs, Biological Sex: ${userSex}.
 
-        The user just completed the following workout: 
-        Activity: "${description}"
-        Perceived Intensity: ${intensity}
+        The user provided the following details (and potentially photos of the activity, equipment, or environment): 
+        ${context}
 
-        Calculate the estimated calories burned using standard Metabolic Equivalent of Task (MET) formulas based on their weight and the duration of the activity. 
+        Calculate the estimated calories burned using standard Metabolic Equivalent of Task (MET) formulas. If photos are provided, use them to gauge the effort, confirm the equipment, or analyze the space.
 
         Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
         {
             "calories_burned": number,
             "workout_summary": "A brief 3-5 word title",
-            "feedback": "A short, encouraging sentence about this specific workout."
+            "feedback": "A short, encouraging sentence about this specific activity."
         }`;
 
-        const requestBody = {
-            contents: [{ parts: [{ text: fitnessPrompt }] }],
-            generationConfig: { responseMimeType: "application/json", temperature: 0.2 }
-        };
-
-        const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
-
         try {
-            // Reusing your awesome auto-retry engine for server stability!
+            // Re-use your image compression loop
+            const base64Images = await Promise.all(files.map(file => compressImage(file, 800)));
+            const requestParts = [{ text: fitnessPrompt }];
+            
+            base64Images.forEach(base64 => {
+                requestParts.push({ inline_data: { mime_type: "image/jpeg", data: base64 } });
+            });
+
+            const requestBody = {
+                contents: [{ parts: requestParts }],
+                generationConfig: { responseMimeType: "application/json", temperature: 0.2 }
+            };
+
+            const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
+            
             let data;
             let maxRetries = 3;
             let delay = 2000;
@@ -780,52 +944,73 @@
 
             const result = JSON.parse(data.candidates[0].content.parts[0].text);
 
-            // 4. Update Daily Storage
-            const todayStr = new Date().toLocaleDateString();
-            let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
-            
-            // Ensure the daily object has all required arrays
-            if (!dailyData[todayStr]) dailyData[todayStr] = { meals: [], exercise: 0, workouts: [] };
-            if (!dailyData[todayStr].workouts) dailyData[todayStr].workouts = [];
-            
-            // Add the new calories to whatever was already there
-            const currentExercise = parseInt(dailyData[todayStr].exercise) || 0;
-            dailyData[todayStr].exercise = currentExercise + result.calories_burned;
-            
-            // Save the full detailed workout object
-            dailyData[todayStr].workouts.unshift({
-                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            // Hold data in pending state
+            pendingWorkout = {
                 description: description,
                 intensity: intensity,
                 calories: result.calories_burned,
-                summary: result.workout_summary || "Workout",
+                summary: result.workout_summary || "Activity",
                 feedback: result.feedback || "Great job!"
-            });
-            
-            localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+            };
 
-            // 5. Update UI & Clean up
-            updateDashboard();
-            closeWorkoutModal();
-            alert(`Great job! You burned approx. ${result.calories_burned} calories.\n\nAI Coach says: ${result.feedback}`);
+            // Inject into UI and switch to Step 2
+            document.getElementById('workout-result-summary').innerText = pendingWorkout.summary;
+            document.getElementById('workout-result-calories').innerText = pendingWorkout.calories;
+            document.getElementById('workout-result-feedback').innerText = pendingWorkout.feedback;
+
+            document.getElementById('workout-input-section').classList.add('hidden');
+            document.getElementById('workout-result-section').classList.remove('hidden');
 
         } catch (error) {
             console.error("Workout Analysis Failed:", error);
-            alert("Something went wrong calculating your workout. Check your internet connection.");
+            alert("Something went wrong calculating your activity. Check your internet connection.");
         } finally {
             document.getElementById('workout-loading').classList.add('hidden');
         }
     };
+
+    window.logFinalWorkout = function() {
+        if (!pendingWorkout) return;
+
+        const todayStr = new Date().toLocaleDateString();
+        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        
+        if (!dailyData[todayStr]) dailyData[todayStr] = { meals: [], exercise: 0, workouts: [] };
+        if (!dailyData[todayStr].workouts) dailyData[todayStr].workouts = [];
+        
+        const currentExercise = parseInt(dailyData[todayStr].exercise) || 0;
+        dailyData[todayStr].exercise = currentExercise + pendingWorkout.calories;
+        
+        dailyData[todayStr].workouts.unshift({
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            description: pendingWorkout.description,
+            intensity: pendingWorkout.intensity,
+            calories: pendingWorkout.calories,
+            summary: pendingWorkout.summary,
+            feedback: pendingWorkout.feedback
+        });
+        
+        localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+        
+        updateDashboard();
+        closeWorkoutModal();
+    };
 	
 	// --- PROFILE MODAL LOGIC ---
     window.openProfileModal = function() {
-        // Load existing data if it exists
         const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
-        if (profile.age) document.getElementById('profile-age').value = profile.age;
-        if (profile.feet) document.getElementById('profile-feet').value = profile.feet;
-        if (profile.inches) document.getElementById('profile-inches').value = profile.inches;
-        if (profile.weight) document.getElementById('profile-weight').value = profile.weight;
-        if (profile.sex) document.getElementById('profile-sex').value = profile.sex;
+        const goals = JSON.parse(localStorage.getItem('alitheaplate_goals') || '[]');
+        
+        document.getElementById('profile-age').value = profile.age || '';
+        document.getElementById('profile-feet').value = profile.feet || '';
+        document.getElementById('profile-inches').value = profile.inches || '';
+        document.getElementById('profile-weight').value = profile.weight || '';
+        document.getElementById('profile-sex').value = profile.sex || 'male';
+        
+        // Reset and check the boxes based on stored goals
+        document.querySelectorAll('input[name="profile-goal"]').forEach(cb => {
+            cb.checked = goals.includes(cb.value);
+        });
         
         document.getElementById('profile-modal').classList.remove('hidden');
     };
@@ -833,8 +1018,8 @@
     window.closeProfileModal = function() {
         document.getElementById('profile-modal').classList.add('hidden');
     };
-
-    window.saveProfile = function() {
+	
+	window.saveProfile = function() {
         const profile = {
             age: document.getElementById('profile-age').value,
             feet: document.getElementById('profile-feet').value,
@@ -843,9 +1028,24 @@
             sex: document.getElementById('profile-sex').value
         };
         
+        // Save goals
+        const selectedGoals = Array.from(document.querySelectorAll('input[name="profile-goal"]:checked'))
+            .map(cb => cb.value);
+        
         localStorage.setItem('alitheaplate_profile', JSON.stringify(profile));
+        localStorage.setItem('alitheaplate_goals', JSON.stringify(selectedGoals));
+        
         closeProfileModal();
-        alert("Profile saved successfully! This data will be used for future fitness calculations.");
+        alert("Profile & goals saved successfully!");
+    };
+
+    window.saveGoalsAndEnter = function() {
+        // Grab goals from the welcome screen checkboxes
+        const selectedGoals = Array.from(document.querySelectorAll('input[name="goal"]:checked'))
+            .map(cb => cb.value);
+        
+        localStorage.setItem('alitheaplate_goals', JSON.stringify(selectedGoals));
+        navigateTo('screen-dashboard');
     };
 
     // --- BACKUP & MIGRATE LOGIC ---
@@ -942,49 +1142,60 @@
         }
     };
 	
-	// --- NAVIGATION LISTENERS ---
-    document.getElementById('prev-day-btn').addEventListener('click', () => {
-        viewedDate.setDate(viewedDate.getDate() - 1);
-        updateDashboard();
-    });
+	// --- SAFE EVENT LISTENER INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // Navigation Listeners
+        const prevDay = document.getElementById('prev-day-btn');
+        if (prevDay) prevDay.addEventListener('click', () => { viewedDate.setDate(viewedDate.getDate() - 1); updateDashboard(); });
 
-    document.getElementById('next-day-btn').addEventListener('click', () => {
-        const today = new Date();
-        if (viewedDate.toLocaleDateString() !== today.toLocaleDateString()) {
-            viewedDate.setDate(viewedDate.getDate() + 1);
+        const nextDay = document.getElementById('next-day-btn');
+        if (nextDay) nextDay.addEventListener('click', () => {
+            const today = new Date();
+            if (viewedDate.toLocaleDateString() !== today.toLocaleDateString()) {
+                viewedDate.setDate(viewedDate.getDate() + 1);
+                updateDashboard();
+            }
+        });
+
+        // Input Listeners
+        const goalInput = document.getElementById('daily-goal-input');
+        if (goalInput) goalInput.addEventListener('input', (e) => {
+            localStorage.setItem('alitheaplate_calorie_goal', e.target.value);
             updateDashboard();
+        });
+        
+        const exerciseInput = document.getElementById('daily-exercise-input');
+        if (exerciseInput) exerciseInput.addEventListener('input', (e) => {
+            const viewedStr = viewedDate.toLocaleDateString();
+            let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+            if (!dailyData[viewedStr]) dailyData[viewedStr] = { meals: [], exercise: 0 };
+            dailyData[viewedStr].exercise = e.target.value || 0;
+            localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+            updateDashboard();
+        });
+        
+        const weightInput = document.getElementById('daily-weight-input');
+        if (weightInput) weightInput.addEventListener('input', (e) => {
+            const viewedStr = viewedDate.toLocaleDateString();
+            let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+            if (!dailyData[viewedStr]) dailyData[viewedStr] = { meals: [], exercise: 0 };
+            dailyData[viewedStr].weight = e.target.value;
+            localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+            renderWeightChart(); 
+        });
+    });
+
+    // Initialize App on load
+    window.onload = () => {
+        let dailyData = localStorage.getItem('alitheaplate_daily');
+        if (dailyData) {
+            // Returning user: Go straight to dashboard
+            navigateTo('screen-dashboard');
+        } else {
+            // First time user: Show welcome screen
+            navigateTo('screen-welcome');
         }
-    });
-
-    // --- INPUT LISTENERS (Targeting the currently viewed day) ---
-    document.getElementById('daily-goal-input').addEventListener('input', (e) => {
-        localStorage.setItem('alitheaplate_calorie_goal', e.target.value);
-        updateDashboard(); // Updates across all days since the goal is universal
-    });
-    
-    document.getElementById('daily-exercise-input').addEventListener('input', (e) => {
-        const viewedStr = viewedDate.toLocaleDateString();
-        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
-        if (!dailyData[viewedStr]) dailyData[viewedStr] = { meals: [], exercise: 0 };
-        dailyData[viewedStr].exercise = e.target.value || 0;
-        localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
-        updateDashboard();
-    });
-	
-	document.getElementById('daily-weight-input').addEventListener('input', (e) => {
-        const viewedStr = viewedDate.toLocaleDateString();
-        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
-        if (!dailyData[viewedStr]) dailyData[viewedStr] = { meals: [], exercise: 0 };
-        
-        dailyData[viewedStr].weight = e.target.value;
-        localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
-        
-        // Redraw the chart immediately when typing
-        renderWeightChart(); 
-    });
-
-    // Initialize Dashboard on load
-    updateDashboard(); 
+    }; 
 
     async function processImage() {
         // Grab ALL selected files directly from the hidden input element!
@@ -993,7 +1204,7 @@
 
         navigateTo('screen-loading');
 
-        const selectedGoalElements = document.querySelectorAll('input[name="goal"]:checked');
+        const selectedGoalElements = document.querySelectorAll('input[name="profile-goal"]:checked');
         if (selectedGoalElements.length === 0) {
             alert("Please select at least one dietary focus.");
             navigateTo('screen-onboarding');
@@ -1163,64 +1374,75 @@
     }
 
     // Update the file preview instead of instantly processing
-    document.getElementById('image-upload').addEventListener('change', (e) => {
-        const fileCount = e.target.files.length;
-        const previewContainer = document.getElementById('file-preview-container');
-        const countText = document.getElementById('file-count-text');
-        
-        if (fileCount > 0) {
-            countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
-            previewContainer.classList.remove('hidden');
-        } else {
-            previewContainer.classList.add('hidden');
-        }
-    });
-    document.getElementById('reset-btn').addEventListener('click', () => {
-        navigateTo('screen-onboarding');
-        document.getElementById('image-upload').value = '';
-        document.getElementById('user-context').value = '';
-        if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
-		document.getElementById('file-preview-container').classList.add('hidden');
-    });
-	// --- LOG MEAL BUTTON LISTENER ---
-    document.getElementById('log-meal-btn').addEventListener('click', () => {
-        if (!pendingMeal) return;
-        
-        const todayStr = new Date().toLocaleDateString();
-        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
-        
-        if (!dailyData[todayStr]) {
-            dailyData[todayStr] = { meals: [], exercise: 0 };
-        }
-        
-        // Add pending meal to today's log with full details
-        dailyData[todayStr].meals.unshift({
-            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
-            meal: pendingMeal.meal,
-            score: pendingMeal.score,
-            calories: pendingMeal.calories,
-            positives: pendingMeal.positives || [],
-            negatives: pendingMeal.negatives || [],
-            recommendation: pendingMeal.recommendation || ""
+    const imgUploadEl = document.getElementById('image-upload');
+    if (imgUploadEl) {
+        imgUploadEl.addEventListener('change', (e) => {
+            const fileCount = e.target.files.length;
+            const previewContainer = document.getElementById('file-preview-container');
+            const countText = document.getElementById('file-count-text');
+            
+            if (fileCount > 0) {
+                countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewContainer.classList.add('hidden');
+            }
         });
-        
-        localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
-        
-        // Clear pending meal, update UI, and return home
-        pendingMeal = null;
-        updateDashboard();
-        
-        // Force the dashboard to look at 'Today' if they were looking at a past date
-        viewedDate = new Date(); 
-        updateDashboard();
-        
-        // Reset file input and go to dashboard
-        document.getElementById('image-upload').value = '';
-        document.getElementById('user-context').value = '';
-        if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
-		document.getElementById('file-preview-container').classList.add('hidden');
-        navigateTo('screen-onboarding');
-    });
+    }
+
+    const resetBtnEl = document.getElementById('reset-btn');
+    if (resetBtnEl) {
+        resetBtnEl.addEventListener('click', () => {
+            navigateTo('screen-onboarding');
+            document.getElementById('image-upload').value = '';
+            document.getElementById('user-context').value = '';
+            if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
+            document.getElementById('file-preview-container').classList.add('hidden');
+        });
+    }
+
+    // --- LOG MEAL BUTTON LISTENER ---
+    const logMealBtnEl = document.getElementById('log-meal-btn');
+    if (logMealBtnEl) {
+        logMealBtnEl.addEventListener('click', () => {
+            if (!pendingMeal) return;
+            
+            const todayStr = new Date().toLocaleDateString();
+            let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+            
+            if (!dailyData[todayStr]) {
+                dailyData[todayStr] = { meals: [], exercise: 0 };
+            }
+            
+            // Add pending meal to today's log with full details
+            dailyData[todayStr].meals.unshift({
+                time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+                meal: pendingMeal.meal,
+                score: pendingMeal.score,
+                calories: pendingMeal.calories,
+                positives: pendingMeal.positives || [],
+                negatives: pendingMeal.negatives || [],
+                recommendation: pendingMeal.recommendation || ""
+            });
+            
+            localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+            
+            // Clear pending meal, update UI, and return home
+            pendingMeal = null;
+            updateDashboard();
+            
+            // Force the dashboard to look at 'Today' if they were looking at a past date
+            viewedDate = new Date(); 
+            updateDashboard();
+            
+            // Reset file input and go to dashboard
+            document.getElementById('image-upload').value = '';
+            document.getElementById('user-context').value = '';
+            if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
+            document.getElementById('file-preview-container').classList.add('hidden');
+            navigateTo('screen-onboarding');
+        });
+    }
 </script>
 </body>
 </html>
