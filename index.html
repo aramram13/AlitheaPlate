@@ -1215,23 +1215,22 @@
     }; 
 
     async function processImage() {
-        // Grab ALL selected files directly from the hidden input element!
         const files = Array.from(document.getElementById('image-upload').files);
         if (files.length === 0) return;
 
         navigateTo('screen-loading');
 
-        const selectedGoalElements = document.querySelectorAll('input[name="profile-goal"]:checked');
-        if (selectedGoalElements.length === 0) {
-            alert("Please select at least one dietary focus.");
-            navigateTo('screen-onboarding');
+        const savedGoals = JSON.parse(localStorage.getItem('alitheaplate_goals') || '[]');
+        
+        if (savedGoals.length === 0) {
+            alert("Please select at least one dietary focus in your profile.");
+            navigateTo('screen-dashboard');
             return;
         }
         
-        const selectedGoal = Array.from(selectedGoalElements).map(cb => cb.value).join(" AND ");
+        const selectedGoal = savedGoals.join(" AND ");
         const scanMode = document.querySelector('input[name="scan-mode"]:checked').value;
         
-        // Grab text from BOTH the initial context box and the new correction box
         const initialContext = document.getElementById('user-context').value.trim();
         const correctionBox = document.getElementById('correction-context');
         const correctionContext = correctionBox ? correctionBox.value.trim() : "";
@@ -1259,14 +1258,12 @@
             const resolution = scanMode === 'recipe' ? 1600 : 800;
             const mimeType = "image/jpeg";
             
-            // Compress ALL images using a Promise.all loop
             const base64Images = await Promise.all(files.map(file => compressImage(file, resolution)));
 
             let contextInstruction = scanMode === "meal" 
                 ? "Analyze the provided photo(s) of a plated meal." 
                 : "Read the text in the provided image(s) (recipe, ingredient list, or label). Calculate the approximate nutritional value of one serving based on the text.";
 
-            // Add the user's manual context if they typed anything
             if (userContext) {
                 contextInstruction += `\n\nCRITICAL USER CONTEXT TO FACTOR IN: "${userContext}"`;
             }
@@ -1286,7 +1283,6 @@
                 "recommendation": "A gentle, actionable tip ONLY IF needed, otherwise provide encouraging praise for a great choice."
             }`;
 
-            // Build the parts array dynamically! 
             const requestParts = [{ text: prompt }];
             
             base64Images.forEach(base64 => {
@@ -1300,10 +1296,9 @@
 
             const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
 
-            // --- AUTO-RETRY ENGINE ---
             let data;
             let maxRetries = 3;
-            let delay = 2000; // Start with a 2-second wait
+            let delay = 2000;
 
             for (let i = 0; i < maxRetries; i++) {
                 const response = await fetch(url, {
@@ -1314,37 +1309,27 @@
                 
                 data = await response.json();
                 
-                // If we get candidates, the scan worked! Break out of the retry loop.
                 if (data.candidates) {
                     break; 
                 } 
-                // If we get a 503 error, wait and try again.
                 else if (data.error && data.error.code === 503) {
-                    console.warn(`API overloaded. Retrying in ${delay/1000}s... (Attempt ${i+1} of ${maxRetries})`);
-                    
-                    // Update the loading screen so the user knows we are trying again
                     document.querySelector('#screen-loading p').innerText = "Server busy. Auto-retrying...";
                     document.querySelector('#screen-loading p').classList.add('text-amber-500');
                     
-                    // Pause the code for the delay time before looping again
                     await new Promise(resolve => setTimeout(resolve, delay));
-                    delay += 2000; // Add 2 more seconds to the wait time for the next attempt
+                    delay += 2000;
                 } 
-                // If it is a different kind of error, stop trying immediately.
                 else {
-                    console.error("RAW API ERROR:", data);
                     throw new Error("The API failed to return nutritional data.");
                 }
             }
 
-            // Final safety check: if we burned through all retries and STILL don't have data, fail gracefully.
             if (!data || !data.candidates) {
                 throw new Error("The API is currently too busy. Please try again later.");
             }
 
             const result = JSON.parse(data.candidates[0].content.parts[0].text);
 
-            // 6. Hold full data in pending state
             pendingMeal = {
                 meal: result.meal_identified,
                 score: result.health_score,
@@ -1354,7 +1339,6 @@
                 recommendation: result.recommendation
             };
 
-            // 7. Inject data into UI
             document.getElementById('result-status').innerText = result.health_score >= 70 ? "Great Choice!" : "Needs Tweaking";
             document.getElementById('detected-meal').innerText = "Detected: " + result.meal_identified;
             document.getElementById('score-text').innerText = result.health_score;
@@ -1363,7 +1347,6 @@
             document.getElementById('list-cons').innerHTML = result.negatives.map(n => `<li>• ${n}</li>`).join('');
             document.getElementById('recommendation-text').innerText = result.recommendation;
 
-            // 8. Animate the score circle
             const circle = document.querySelector('.score-circle');
             const offset = 213.6 - (result.health_score / 100) * 213.6;
             circle.style.strokeDashoffset = offset;
@@ -1373,17 +1356,14 @@
             else if (result.health_score >= 40) circle.classList.add('text-amber-500');
             else circle.classList.add('text-red-500');
 
-            // 9. Stop the loading text and show results
             clearInterval(loadingInterval);
             navigateTo('screen-results');
 
         } catch (error) {
-            // If anything fails, stop the text cycle and show an error
             clearInterval(loadingInterval);
             console.error("Analysis Failed:", error);
             alert("Something went wrong analyzing the image. Check your console!");
             
-            // FIX: Wipe the file input clean so you can retry the exact same photo immediately
             document.getElementById('image-upload').value = '';
             
             navigateTo('screen-capture');
