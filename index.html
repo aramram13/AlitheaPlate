@@ -186,7 +186,8 @@
             <textarea id="user-context" placeholder="e.g., 'This is a turkey burger, not beef' or 'I used low-sodium soy sauce'" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
         </div>
 		<div id="file-preview-container" class="mt-4 w-full max-w-xs text-center hidden">
-            <p id="file-count-text" class="text-sm font-bold text-emerald-700 mb-3">📸 1 image selected</p>
+            <div id="thumbnail-preview-grid" class="grid grid-cols-3 gap-2 mb-4 max-h-32 overflow-y-auto p-1 bg-gray-50 rounded-xl border border-gray-200"></div>
+			<p id="file-count-text" class="text-sm font-bold text-emerald-700 mb-3">📸 1 image selected</p>
             <button onclick="processImage()" class="w-full bg-gray-900 hover:bg-black text-white font-bold py-3 rounded-xl shadow-md transition-colors">
                 Analyze Meal
             </button>
@@ -304,6 +305,7 @@
                     </label>
                     <p id="workout-file-count" class="text-xs text-blue-600 font-bold hidden mt-2 text-center"></p>
                 </div>
+				<div id="workout-preview-grid" class="grid grid-cols-3 gap-2 mt-2"></div>
 
                 <button onclick="calculateWorkout()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl mt-4 shadow-md transition-colors">
                     Calculate Burn
@@ -843,6 +845,10 @@
         
         const countText = document.getElementById('workout-file-count');
         if (workoutFilesArray.length > 0) {
+            
+            // NEW: This is the magic line that actually draws the pictures on the screen!
+            renderImagePreviews(workoutFilesArray, 'workout-preview-grid');
+            
             countText.innerText = `📸 ${workoutFilesArray.length} image${workoutFilesArray.length > 1 ? 's' : ''} attached.`;
             countText.classList.remove('hidden');
         } else {
@@ -865,6 +871,10 @@
 
         pendingWorkout = null;
         workoutFilesArray = []; // Clear old photos when opening a fresh log
+        
+        // NEW: This line clears the visual thumbnails from the screen!
+        document.getElementById('workout-preview-grid').innerHTML = ''; 
+        
         document.getElementById('workout-modal').classList.remove('hidden');
     };
 
@@ -876,7 +886,7 @@
         const description = document.getElementById('workout-description').value.trim();
         const intensity = document.querySelector('input[name="workout-intensity"]:checked').value;
         
-        const files = workoutFilesArray; // Use the accumulated array, not the HTML input
+        const files = workoutFilesArray; 
         
         if (!description && files.length === 0) {
             alert("Please describe your activity or attach an image so the AI can calculate the burn!");
@@ -885,7 +895,6 @@
 
         document.getElementById('workout-loading').classList.remove('hidden');
 
-        // Build the core context string
         let context = `Activity: "${description}"\nPerceived Intensity: ${intensity}`;
         
         if (isRetry) {
@@ -916,7 +925,6 @@
         }`;
 
         try {
-            // Re-use your image compression loop
             const base64Images = await Promise.all(files.map(file => compressImage(file, 800)));
             const requestParts = [{ text: fitnessPrompt }];
             
@@ -932,7 +940,7 @@
             const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
             
             let data;
-            let maxRetries = 3;
+            let maxRetries = 5;
             let delay = 2000;
 
             for (let i = 0; i < maxRetries; i++) {
@@ -942,12 +950,19 @@
                     body: JSON.stringify(requestBody)
                 });
                 data = await response.json();
-                if (data.candidates) break;
                 
-                if (data.error && data.error.code === 503) {
-                    await new Promise(resolve => setTimeout(resolve, delay));
+                if (data.candidates) {
+                    break;
+                }
+                
+                // UPDATED: Catch both 503 and 429 rate limit errors for workouts too
+                if (data.error && (data.error.code === 503 || data.error.code === 429)) {
+                    console.warn(`Workout API Limit/Busy (Code ${data.error.code}). Reason: ${data.error.message}`);
+                    const waitTime = data.error.code === 429 ? 15000 : delay;
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
                     delay += 2000;
                 } else {
+                    console.error("RAW API RESPONSE:", data);
                     throw new Error("API Error");
                 }
             }
@@ -956,7 +971,6 @@
 
             const result = JSON.parse(data.candidates[0].content.parts[0].text);
 
-            // Hold data in pending state
             pendingWorkout = {
                 description: description,
                 intensity: intensity,
@@ -965,7 +979,6 @@
                 feedback: result.feedback || "Great job!"
             };
 
-            // Inject into UI and switch to Step 2
             document.getElementById('workout-result-summary').innerText = pendingWorkout.summary;
             document.getElementById('workout-result-calories').innerText = pendingWorkout.calories;
             document.getElementById('workout-result-feedback').innerText = pendingWorkout.feedback;
@@ -1297,7 +1310,7 @@
             const url = "https://nutrisnap-api.aaronramthunmusic.workers.dev";
 
             let data;
-            let maxRetries = 3;
+            let maxRetries = 5;
             let delay = 2000;
 
             for (let i = 0; i < maxRetries; i++) {
@@ -1312,14 +1325,18 @@
                 if (data.candidates) {
                     break; 
                 } 
-                else if (data.error && data.error.code === 503) {
-                    document.querySelector('#screen-loading p').innerText = "Server busy. Auto-retrying...";
+                else if (data.error && (data.error.code === 503 || data.error.code === 429)) {
+                    console.warn(`API Limit/Busy (Code ${data.error.code}). Reason: ${data.error.message}`);
+                    document.querySelector('#screen-loading p').innerText = "API limit reached. Pausing and auto-retrying...";
                     document.querySelector('#screen-loading p').classList.add('text-amber-500');
                     
-                    await new Promise(resolve => setTimeout(resolve, delay));
+                    const waitTime = data.error.code === 429 ? 15000 : delay; 
+                    
+                    await new Promise(resolve => setTimeout(resolve, waitTime));
                     delay += 2000;
                 } 
                 else {
+                    console.error("RAW API RESPONSE:", data);
                     throw new Error("The API failed to return nutritional data.");
                 }
             }
@@ -1374,11 +1391,15 @@
     const imgUploadEl = document.getElementById('image-upload');
     if (imgUploadEl) {
         imgUploadEl.addEventListener('change', (e) => {
-            const fileCount = e.target.files.length;
+            const files = Array.from(e.target.files);
+            const fileCount = files.length;
             const previewContainer = document.getElementById('file-preview-container');
             const countText = document.getElementById('file-count-text');
             
             if (fileCount > 0) {
+                // NEW: Fire the preview rendering function
+                renderImagePreviews(files);
+                
                 countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
                 previewContainer.classList.remove('hidden');
             } else {
@@ -1438,6 +1459,29 @@
             if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
             document.getElementById('file-preview-container').classList.add('hidden');
             navigateTo('screen-dashboard');
+        });
+    }
+	// Updated to accept a specific container ID
+    function renderImagePreviews(files, containerId) {
+        const gridContainer = document.getElementById(containerId);
+        if (!gridContainer) return;
+        
+        gridContainer.innerHTML = ''; // Clear out old previews
+        
+        files.forEach(file => {
+            const imgUrl = URL.createObjectURL(file);
+            
+            const wrapper = document.createElement('div');
+            wrapper.className = "relative aspect-square bg-gray-200 rounded-lg overflow-hidden shadow-sm border border-gray-300/50 mt-2";
+            
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            img.className = "w-full h-full object-cover";
+            
+            img.onload = () => { URL.revokeObjectURL(imgUrl); };
+            
+            wrapper.appendChild(img);
+            gridContainer.appendChild(wrapper);
         });
     }
 </script>
