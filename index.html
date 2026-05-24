@@ -145,11 +145,30 @@
             </div>
         </div>
 
-        <div class="flex justify-between items-center mb-3">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">🔥 Calories In vs Out</h3>
+                <div class="bg-gray-100 rounded-lg p-1 flex text-xs font-bold" id="cal-time-filters">
+                    <button onclick="setCalorieRange(7)" id="cal-btn-7" class="px-3 py-1 rounded bg-white shadow-sm text-emerald-600 transition-colors">1W</button>
+                    <button onclick="setCalorieRange(30)" id="cal-btn-30" class="px-3 py-1 rounded text-gray-400 hover:text-gray-600 transition-colors">1M</button>
+                    <button onclick="setCalorieRange(365)" id="cal-btn-365" class="px-3 py-1 rounded text-gray-400 hover:text-gray-600 transition-colors">1Y</button>
+                </div>
+            </div>
+            <div class="relative h-48 w-full">
+                <canvas id="calorieChart"></canvas>
+            </div>
+        </div>
+		
+		<div class="flex justify-between items-center mb-3">
             <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Activity</h3>
-            <button onclick="openWorkoutModal()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
-                + Log Workout
-            </button>
+            <div class="flex gap-2">
+                <button onclick="openBPModal()" class="bg-rose-100 hover:bg-rose-200 text-rose-700 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
+                    + Log Vitals
+                </button>
+                <button onclick="openWorkoutModal()" class="bg-blue-100 hover:bg-blue-200 text-blue-700 text-xs font-bold py-1.5 px-3 rounded-lg transition-colors shadow-sm">
+                    + Log Workout
+                </button>
+            </div>
         </div>
         <div id="history-container" class="space-y-2 overflow-y-auto max-h-48 pb-4">
             <p class="text-xs text-gray-400 italic">No activity logged yet.</p>
@@ -539,6 +558,68 @@
             </button>
         </div>
     </div>
+	
+	<!-- BLOOD PRESSURE MODAL -->
+    <div id="bp-modal" class="hidden fixed inset-0 bg-gray-900/60 z-50 flex items-center justify-center p-4">
+        <div class="bg-white w-full sm:w-11/12 rounded-2xl p-6 max-h-[85vh] overflow-y-auto shadow-2xl relative">
+            
+            <div id="bp-loading" class="hidden absolute inset-0 bg-white/90 z-10 flex flex-col items-center justify-center rounded-2xl">
+                <div class="loader mb-4 !border-t-rose-500"></div>
+                <p class="text-gray-800 font-bold animate-pulse text-center">Analyzing context...<br><span class="text-xs font-normal text-gray-500">Reviewing today's meals and workouts</span></p>
+            </div>
+
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-black text-gray-800 flex items-center gap-2">❤️ Blood Pressure</h2>
+                <button onclick="closeBPModal()" class="text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
+            </div>
+
+            <!-- INPUT SECTION -->
+            <div id="bp-input-section" class="space-y-4">
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Systolic (Top)</label>
+                        <input type="number" id="bp-systolic" placeholder="120" class="w-full bg-rose-50 border border-gray-300 rounded-xl px-4 py-3 text-2xl text-center font-black text-rose-700 focus:outline-none focus:border-rose-500 shadow-sm">
+                    </div>
+                    <div class="flex items-center justify-center pt-6 text-2xl font-black text-gray-300">/</div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Diastolic (Bottom)</label>
+                        <input type="number" id="bp-diastolic" placeholder="80" class="w-full bg-rose-50 border border-gray-300 rounded-xl px-4 py-3 text-2xl text-center font-black text-rose-700 focus:outline-none focus:border-rose-500 shadow-sm">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Context / Medications (Optional)</label>
+                    <textarea id="bp-context" placeholder="e.g., 'Took my lisinopril an hour ago' or 'Feeling stressed today'" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-rose-500 resize-none shadow-sm" rows="2"></textarea>
+                </div>
+
+                <button onclick="calculateBP()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl mt-4 shadow-md transition-colors">
+                    Analyze Vitals
+                </button>
+            </div>
+
+            <!-- RESULT SECTION -->
+            <div id="bp-result-section" class="hidden space-y-4">
+                <div class="bg-rose-50 rounded-2xl p-5 mb-2 flex justify-between items-center shadow-sm border border-rose-100">
+                    <div class="pr-4">
+                        <h2 id="bp-result-status" class="text-2xl font-black text-rose-800 mb-1 leading-tight">Status</h2>
+                    </div>
+                    <div class="text-right">
+                        <span id="bp-result-numbers" class="text-3xl font-black text-gray-800">120/80</span>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                    <h3 class="flex items-center font-bold text-rose-700 mb-2 uppercase tracking-wide text-xs">🧠 Contextual Feedback</h3>
+                    <p id="bp-result-feedback" class="text-gray-700 text-sm font-medium leading-relaxed"></p>
+                </div>
+
+                <button onclick="logFinalBP()" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-4 transition-colors">
+                    Save to Dashboard
+                </button>
+            </div>
+
+        </div>
+    </div>
 
 <script>
 
@@ -726,6 +807,134 @@
         document.getElementById('chart-next-btn').disabled = (chartEndOffset <= 0);
     }
 	
+	// --- CALORIE CHART LOGIC ---
+    let calorieChartInstance = null;
+    let currentCalorieRange = 7; // Default to 1 Week
+
+    window.setCalorieRange = function(days) {
+        currentCalorieRange = days;
+        
+        // Update the visual styling of the toggle buttons
+        ['7', '30', '365'].forEach(d => {
+            const btn = document.getElementById(`cal-btn-${d}`);
+            if (btn) {
+                if (parseInt(d) === days) {
+                    btn.className = "px-3 py-1 rounded bg-white shadow-sm text-emerald-600 transition-colors";
+                } else {
+                    btn.className = "px-3 py-1 rounded text-gray-400 hover:text-gray-600 transition-colors";
+                }
+            }
+        });
+        
+        renderCalorieChart();
+    };
+
+    window.renderCalorieChart = function() {
+        const ctx = document.getElementById('calorieChart');
+        if (!ctx) return;
+
+        // Clear the old chart if it exists so they don't overlap
+        if (calorieChartInstance) {
+            calorieChartInstance.destroy();
+        }
+
+        const dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        
+        const labels = [];
+        const intakeData = [];
+        const burnedData = [];
+
+        // Loop backward through time based on the selected range
+        const today = new Date();
+        for (let i = currentCalorieRange - 1; i >= 0; i--) {
+            const d = new Date(today);
+            d.setDate(today.getDate() - i);
+            const dateStr = d.toLocaleDateString();
+            
+            // Format dates (e.g., "5/24")
+            labels.push(d.toLocaleDateString([], { month: 'numeric', day: 'numeric' }));
+            
+            const dayData = dailyData[dateStr] || {};
+            
+            // Tally up total meal calories
+            let dailyIntake = 0;
+            if (dayData.meals && Array.isArray(dayData.meals)) {
+                dayData.meals.forEach(m => {
+                    dailyIntake += Number(m.calories) || 0;
+                });
+            }
+            intakeData.push(dailyIntake);
+
+            // Tally up total workout calories
+            let dailyBurned = 0;
+            if (dayData.workouts && Array.isArray(dayData.workouts)) {
+                dayData.workouts.forEach(w => {
+                    dailyBurned += Number(w.calories) || 0;
+                });
+            }
+            burnedData.push(dailyBurned);
+        }
+
+        // Draw the dual-bar chart
+        calorieChartInstance = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Intake (kcal)',
+                        data: intakeData,
+                        backgroundColor: 'rgba(52, 211, 153, 0.8)', // Tailwind Emerald-400
+                        borderRadius: 4,
+                        barPercentage: 0.7
+                    },
+                    {
+                        label: 'Burned (kcal)',
+                        data: burnedData,
+                        backgroundColor: 'rgba(251, 146, 60, 0.8)', // Tailwind Orange-400
+                        borderRadius: 4,
+                        barPercentage: 0.7
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        grid: { color: '#f3f4f6', drawBorder: false },
+                        ticks: { font: { size: 10 }, color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { 
+                            font: { size: 10 }, 
+                            color: '#9ca3af',
+                            maxTicksLimit: currentCalorieRange === 7 ? 7 : (currentCalorieRange === 30 ? 15 : 12)
+                        }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true, boxWidth: 8, font: { size: 11 } }
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false,
+                        backgroundColor: 'rgba(17, 24, 39, 0.9)',
+                        titleFont: { size: 13 },
+                        bodyFont: { size: 12 },
+                        padding: 10,
+                        cornerRadius: 8
+                    }
+                },
+                interaction: { mode: 'nearest', axis: 'x', intersect: false }
+            }
+        });
+    };
+	
 	// --- CHART NAVIGATION LISTENERS ---
     document.getElementById('chart-prev-btn').addEventListener('click', () => {
         let shiftDays = chartMode === 'week' ? 7 : (chartMode === 'month' ? 30 : 365);
@@ -801,6 +1010,7 @@
 
         // Draw the weight chart for the currently viewed day
         renderWeightChart();
+		renderCalorieChart();
 
         // 6. Render the History List
         const historyContainer = document.getElementById('history-container');
@@ -1062,6 +1272,130 @@
         
         updateDashboard();
         closeWorkoutModal();
+    };
+	
+	// --- BLOOD PRESSURE LOGIC ---
+    let pendingBP = null;
+
+    window.openBPModal = function() {
+        document.getElementById('bp-systolic').value = '';
+        document.getElementById('bp-diastolic').value = '';
+        document.getElementById('bp-context').value = '';
+        
+        document.getElementById('bp-input-section').classList.remove('hidden');
+        document.getElementById('bp-result-section').classList.add('hidden');
+        document.getElementById('bp-loading').classList.add('hidden');
+        
+        pendingBP = null;
+        document.getElementById('bp-modal').classList.remove('hidden');
+    };
+
+    window.closeBPModal = function() {
+        document.getElementById('bp-modal').classList.add('hidden');
+    };
+
+    window.calculateBP = async function() {
+        const sys = document.getElementById('bp-systolic').value;
+        const dia = document.getElementById('bp-diastolic').value;
+        const userCtx = document.getElementById('bp-context').value.trim();
+
+        if (!sys || !dia) {
+            alert("Please enter both systolic and diastolic numbers.");
+            return;
+        }
+
+        document.getElementById('bp-loading').classList.remove('hidden');
+
+        // GATHER THE CONTEXT
+        const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
+        const todayStr = new Date().toLocaleDateString();
+        const dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}')[todayStr] || { meals: [], workouts: [] };
+        
+        // Format today's activities so the AI can read them easily
+        const recentMeals = dailyData.meals ? dailyData.meals.map(m => m.meal).join(", ") : "None logged";
+        const recentWorkouts = dailyData.workouts ? dailyData.workouts.map(w => w.summary).join(", ") : "None logged";
+
+        const bpPrompt = `You are an expert, empathetic medical AI assistant.
+        The user (Age: ${profile.age || "Unknown"}, Sex: ${profile.sex || "Unknown"}) just recorded a blood pressure reading of ${sys}/${dia}.
+        
+        User's direct context/medications: "${userCtx}"
+        Meals logged today: ${recentMeals}
+        Workouts logged today: ${recentWorkouts}
+
+        Analyze this reading holistically. 
+        CRITICAL INSTRUCTION: Do not cause unnecessary alarm. If the reading is elevated, check the recent workouts and meals. If they recently worked out, clearly explain that elevated BP is a normal, temporary physiological response to exercise. If they ate a high-sodium meal, gently mention the correlation.
+
+        Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
+        {
+            "status": "e.g., Normal, Elevated, Post-Workout Normal, Hypertension Stage 1",
+            "feedback": "A reassuring paragraph explaining the reading based on their specific context."
+        }`;
+
+        try {
+            const response = await fetch("https://nutrisnap-api.aaronramthunmusic.workers.dev", {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: bpPrompt }] }],
+                    generationConfig: { responseMimeType: "application/json", temperature: 0.2 }
+                })
+            });
+            
+            const data = await response.json();
+            if (!data.candidates) throw new Error("API Limit or Error");
+
+            const result = JSON.parse(data.candidates[0].content.parts[0].text);
+
+            pendingBP = {
+                sys: sys,
+                dia: dia,
+                status: result.status,
+                feedback: result.feedback
+            };
+
+            document.getElementById('bp-result-numbers').innerText = `${sys}/${dia}`;
+            document.getElementById('bp-result-status').innerText = result.status;
+            document.getElementById('bp-result-feedback').innerText = result.feedback;
+
+            // Adjust color based on status text
+            const statusEl = document.getElementById('bp-result-status');
+            statusEl.className = "text-2xl font-black mb-1 leading-tight " + 
+                (result.status.toLowerCase().includes("normal") ? "text-emerald-700" : "text-amber-600");
+
+            document.getElementById('bp-input-section').classList.add('hidden');
+            document.getElementById('bp-result-section').classList.remove('hidden');
+
+        } catch (error) {
+            console.error("BP Analysis Failed:", error);
+            alert("Something went wrong analyzing your vitals. Please try again.");
+        } finally {
+            document.getElementById('bp-loading').classList.add('hidden');
+        }
+    };
+
+    window.logFinalBP = function() {
+        if (!pendingBP) return;
+
+        const todayStr = new Date().toLocaleDateString();
+        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        
+        if (!dailyData[todayStr]) dailyData[todayStr] = { meals: [], workouts: [], vitals: [] };
+        if (!dailyData[todayStr].vitals) dailyData[todayStr].vitals = [];
+        
+        dailyData[todayStr].vitals.unshift({
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            type: "Blood Pressure",
+            reading: `${pendingBP.sys}/${pendingBP.dia}`,
+            status: pendingBP.status,
+            feedback: pendingBP.feedback
+        });
+        
+        localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+        
+        if (navigator.vibrate) navigator.vibrate(50);
+        
+        updateDashboard();
+        closeBPModal();
     };
 	
 	// --- PROFILE MODAL LOGIC ---
