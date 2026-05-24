@@ -185,6 +185,11 @@
             <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Optional Context / Corrections</label>
             <textarea id="user-context" placeholder="e.g., 'This is a turkey burger, not beef' or 'I used low-sodium soy sauce'" class="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
         </div>
+		<!-- NEW: Quick Log Section -->
+        <div id="quick-log-container" class="w-full max-w-xs mt-6 hidden">
+            <h3 class="text-xs font-bold text-emerald-700 uppercase tracking-wide mb-3 flex items-center">⚡ Quick Log</h3>
+            <div id="quick-log-list" class="flex flex-wrap gap-2"></div>
+        </div>
 		<div id="file-preview-container" class="mt-4 w-full max-w-xs text-center hidden">
             <div id="thumbnail-preview-grid" class="grid grid-cols-3 gap-2 mb-4 max-h-32 overflow-y-auto p-1 bg-gray-50 rounded-xl border border-gray-200"></div>
 			<p id="file-count-text" class="text-sm font-bold text-emerald-700 mb-3">📸 1 image selected</p>
@@ -192,10 +197,40 @@
                 Analyze Meal
             </button>
         </div>
-    </div> <div id="screen-loading" class="p-6 flex flex-col flex-grow justify-center items-center hidden bg-white z-20 absolute inset-0 mt-16">
-        <div class="loader mb-6"></div>
-        <h2 class="text-xl font-bold text-gray-800 mb-2">Analyzing image...</h2>
-        <p class="text-gray-500 text-sm text-center animate-pulse">Checking ingredients and calculating ratios</p>
+    </div> <!-- SCREEN: LOADING (SKELETON UI) -->
+    <div id="screen-loading" class="p-6 flex flex-col flex-grow bg-white z-20 absolute inset-0 mt-16 overflow-hidden hidden">
+        <!-- Skeleton Score Card -->
+        <div class="bg-gray-100 rounded-2xl h-28 mb-6 w-full animate-pulse border border-gray-100"></div>
+        
+        <!-- Skeleton List Items -->
+        <div class="space-y-6 w-full">
+            <div>
+                <div class="h-4 bg-gray-200 rounded-md w-1/3 mb-4 animate-pulse"></div>
+                <div class="space-y-3">
+                    <div class="h-3 bg-gray-100 rounded w-full animate-pulse"></div>
+                    <div class="h-3 bg-gray-100 rounded w-5/6 animate-pulse"></div>
+                </div>
+            </div>
+            
+            <div class="w-full h-px bg-gray-100"></div>
+            
+            <div>
+                <div class="h-4 bg-gray-200 rounded-md w-1/3 mb-4 animate-pulse"></div>
+                <div class="space-y-3">
+                    <div class="h-3 bg-gray-100 rounded w-full animate-pulse"></div>
+                    <div class="h-3 bg-gray-100 rounded w-4/5 animate-pulse"></div>
+                </div>
+            </div>
+            
+            <div class="w-full h-px bg-gray-100"></div>
+            
+            <!-- Skeleton Recommendation Card -->
+            <div class="bg-gray-50 rounded-xl h-20 w-full animate-pulse border border-gray-100"></div>
+        </div>
+        
+        <div class="mt-auto pt-8 w-full text-center pb-28">
+            <p class="text-emerald-600 text-sm font-bold animate-pulse tracking-wide">Scanning image...</p>
+        </div>
     </div>
 
     <div id="screen-results" class="p-6 flex flex-col flex-grow overflow-y-auto hidden pb-28">
@@ -217,7 +252,10 @@
             </div>
         </div>
 
-        <div class="space-y-6">
+        <!-- NEW: Smart Deep Dive Metrics Container -->
+        <div id="deep-dive-container" class="mb-6 flex flex-col gap-3"></div>
+		
+		<div class="space-y-6">
             <div>
                 <h3 class="flex items-center font-bold text-emerald-700 mb-3 uppercase tracking-wide text-sm">
                     <span class="w-3 h-3 rounded-full bg-emerald-500 mr-2 shadow-sm"></span> Positive Aspects
@@ -548,6 +586,9 @@
             if (userCtx) userCtx.value = '';
             const filePreview = document.getElementById('file-preview-container');
             if (filePreview) filePreview.classList.add('hidden');
+            
+            // NEW: Fire the quick log renderer!
+            renderQuickLog();
         }
     }
 
@@ -1017,6 +1058,8 @@
         
         localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
         
+        if (navigator.vibrate) navigator.vibrate(50); // NEW: Tiny physical buzz
+        
         updateDashboard();
         closeWorkoutModal();
     };
@@ -1210,7 +1253,45 @@
         });
     });
 
-    // Initialize App on load
+    // --- NATIVE PULL-TO-REFRESH ---
+        let touchStartY = 0;
+        const dashboardEl = document.getElementById('screen-dashboard');
+        
+        dashboardEl.addEventListener('touchstart', e => {
+            // Only register the pull if we are at the very top of the dashboard
+            if (dashboardEl.scrollTop === 0) {
+                touchStartY = e.touches[0].clientY;
+            }
+        }, {passive: true});
+
+        dashboardEl.addEventListener('touchend', e => {
+            if (dashboardEl.scrollTop === 0 && touchStartY > 0) {
+                const touchEndY = e.changedTouches[0].clientY;
+                
+                // If they pulled down more than 80 pixels
+                if (touchEndY - touchStartY > 80) { 
+                    if (navigator.vibrate) navigator.vibrate(25); // Gentle pop
+                    
+                    updateDashboard(); // Re-render the data
+                    
+                    // Give visual feedback that it worked
+                    const msg = document.getElementById('dashboard-message');
+                    if (msg) {
+                        const originalText = msg.innerText;
+                        msg.innerText = "✨ Dashboard synced & refreshed!";
+                        msg.classList.add('text-indigo-600');
+                        
+                        setTimeout(() => {
+                            msg.innerText = originalText;
+                            msg.classList.remove('text-indigo-600');
+                        }, 2000);
+                    }
+                }
+            }
+            touchStartY = 0; // Reset for the next swipe
+        });
+	
+	// Initialize App on load
     window.onload = () => {
         let dailyData = localStorage.getItem('alitheaplate_daily');
         
@@ -1227,7 +1308,83 @@
         }
     }; 
 
-    async function processImage() {
+    // NEW: Render the top 5 most frequent meals
+    window.renderQuickLog = function() {
+        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        let mealCounts = {};
+        let mealDetails = {};
+
+        // Loop through history to count meals
+        Object.values(dailyData).forEach(day => {
+            if (day.meals && Array.isArray(day.meals)) {
+                day.meals.forEach(meal => {
+                    if (meal.meal && meal.calories) {
+                        const mealName = meal.meal;
+                        mealCounts[mealName] = (mealCounts[mealName] || 0) + 1;
+                        // Save the most recent version of this meal's details
+                        if (!mealDetails[mealName]) {
+                            mealDetails[mealName] = meal;
+                        }
+                    }
+                });
+            }
+        });
+
+        // Sort by most frequent and grab the top 5
+        const sortedMeals = Object.keys(mealCounts).sort((a, b) => mealCounts[b] - mealCounts[a]).slice(0, 5);
+
+        const container = document.getElementById('quick-log-container');
+        const list = document.getElementById('quick-log-list');
+
+        if (sortedMeals.length > 0) {
+            list.innerHTML = sortedMeals.map(mealName => {
+                const meal = mealDetails[mealName];
+                // Safely package the JSON to pass it into the button click
+                const mealJson = encodeURIComponent(JSON.stringify(meal));
+                
+                return `
+                <button onclick="quickLogMeal('${mealJson}')" class="bg-gray-50 hover:bg-emerald-50 border border-gray-200 hover:border-emerald-300 text-gray-700 text-xs font-medium py-1.5 px-3 rounded-xl transition-all flex items-center gap-1 shadow-sm text-left max-w-full">
+                    <span class="text-emerald-600 font-bold">+</span> 
+                    <span class="truncate max-w-[140px]">${mealName}</span> 
+                    <span class="text-gray-400 font-normal">(${meal.calories})</span>
+                </button>`;
+            }).join('');
+            container.classList.remove('hidden');
+        } else {
+            container.classList.add('hidden');
+        }
+    };
+
+    // NEW: The action that fires when a quick-log button is clicked
+    window.quickLogMeal = function(encodedMeal) {
+        const mealData = JSON.parse(decodeURIComponent(encodedMeal));
+        const todayStr = new Date().toLocaleDateString();
+        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        
+        if (!dailyData[todayStr]) dailyData[todayStr] = { meals: [], exercise: 0 };
+        if (!dailyData[todayStr].meals) dailyData[todayStr].meals = [];
+        
+        dailyData[todayStr].meals.unshift({
+            time: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            meal: mealData.meal,
+            score: mealData.score,
+            calories: mealData.calories,
+            positives: mealData.positives || [],
+            negatives: mealData.negatives || [],
+            recommendation: mealData.recommendation || "",
+            targeted_metrics: mealData.targeted_metrics || [] // Carries over your new smart deep dives!
+        });
+        
+        localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
+        
+        if (navigator.vibrate) navigator.vibrate(50); // NEW: Tiny physical buzz
+        
+        viewedDate = new Date(); 
+        updateDashboard();
+        navigateTo('screen-dashboard');
+    };
+	
+	async function processImage() {
         const files = Array.from(document.getElementById('image-upload').files);
         if (files.length === 0) return;
 
@@ -1286,11 +1443,21 @@
 
             Evaluate the meal holistically. Do not be overly critical of minor details if the overall meal is healthy. 
             
+            Crucially, provide a "Smart Deep Dive" specifically tailored to their dietary focus. If they selected Heart Healthy/Low Sodium, estimate the sodium and saturated fat. If Diabetic, estimate net carbs and sugar. If Fitness, estimate protein and calories.
+
             Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
             {
                 "meal_identified": "Name of meal or recipe",
                 "health_score": number 0-100,
                 "calories": number,
+                "targeted_metrics": [
+                    {
+                        "name": "Target Metric Name (e.g., Sodium, Protein, Net Carbs)",
+                        "value": "e.g., 850mg, 45g",
+                        "status": "good, warning, or danger",
+                        "context": "A short sentence explaining why this matters for their specific goal."
+                    }
+                ],
                 "positives": ["positive 1", "positive 2"],
                 "negatives": ["negative 1", "negative 2 (Leave empty if the meal is great)"],
                 "recommendation": "A gentle, actionable tip ONLY IF needed, otherwise provide encouraging praise for a great choice."
@@ -1360,6 +1527,36 @@
             document.getElementById('detected-meal').innerText = "Detected: " + result.meal_identified;
             document.getElementById('score-text').innerText = result.health_score;
             
+			// NEW: Render the Smart Deep Dives dynamically
+            const deepDiveContainer = document.getElementById('deep-dive-container');
+            if (result.targeted_metrics && result.targeted_metrics.length > 0) {
+                deepDiveContainer.innerHTML = result.targeted_metrics.map(metric => {
+                    // Automatically color-code the cards based on the AI's assessment
+                    let colorClass = "bg-emerald-50 border-emerald-200 text-emerald-800";
+                    let icon = "✅";
+                    
+                    if (metric.status === "warning") {
+                        colorClass = "bg-amber-50 border-amber-200 text-amber-900";
+                        icon = "⚠️";
+                    } else if (metric.status === "danger") {
+                        colorClass = "bg-red-50 border-red-200 text-red-900";
+                        icon = "🛑";
+                    }
+
+                    return `
+                    <div class="rounded-xl p-4 border shadow-sm ${colorClass}">
+                        <div class="flex justify-between items-center mb-1">
+                            <h3 class="font-bold text-sm uppercase tracking-wide flex items-center gap-1">${icon} ${metric.name}</h3>
+                            <span class="font-black text-lg">${metric.value}</span>
+                        </div>
+                        <p class="text-xs font-medium opacity-90">${metric.context}</p>
+                    </div>
+                    `;
+                }).join('');
+            } else {
+                deepDiveContainer.innerHTML = ''; // Keep it clean if there are no specific metrics
+            }
+			
             document.getElementById('list-pros').innerHTML = result.positives.map(p => `<li>• ${p}</li>`).join('');
             document.getElementById('list-cons').innerHTML = result.negatives.map(n => `<li>• ${n}</li>`).join('');
             document.getElementById('recommendation-text').innerText = result.recommendation;
@@ -1398,7 +1595,7 @@
             
             if (fileCount > 0) {
                 // NEW: Fire the preview rendering function
-                renderImagePreviews(files);
+                renderImagePreviews(files, 'thumbnail-preview-grid');
                 
                 countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
                 previewContainer.classList.remove('hidden');
@@ -1445,6 +1642,8 @@
             
             localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
             
+			if (navigator.vibrate) navigator.vibrate(50);
+			
             // Clear pending meal, update UI, and return home
             pendingMeal = null;
             updateDashboard();
