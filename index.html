@@ -159,6 +159,17 @@
             </div>
         </div>
 		
+		<!-- BLOOD PRESSURE TRENDS CARD -->
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-sm font-bold text-gray-800 uppercase tracking-wide">❤️ Blood Pressure Trends</h3>
+                <span class="text-xs text-gray-400 font-medium">Last 7 Readings</span>
+            </div>
+            <div class="relative h-48 w-full">
+                <canvas id="bpChart"></canvas>
+            </div>
+        </div>
+		
 		<div class="flex justify-between items-center mb-3">
             <h3 class="text-sm font-bold text-gray-400 uppercase tracking-wider">Today's Activity</h3>
             <div class="flex gap-2">
@@ -829,7 +840,109 @@
         renderCalorieChart();
     };
 
-    window.renderCalorieChart = function() {
+    // --- BLOOD PRESSURE CHART LOGIC ---
+    let bpChartInstance = null;
+
+    window.renderBPChart = function() {
+        const ctx = document.getElementById('bpChart');
+        if (!ctx) return;
+
+        if (bpChartInstance) {
+            bpChartInstance.destroy();
+        }
+
+        const dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        
+        const labels = [];
+        const systolicData = [];
+        const diastolicData = [];
+
+        // Gather all vitals across logged dates
+        const sortedDates = Object.keys(dailyData).sort((a, b) => new Date(a) - new Date(b));
+        
+        let readingsCount = 0;
+        // Walk through dates to extract up to the last 7 BP entries
+        for (const dateStr of sortedDates) {
+            const dayData = dailyData[dateStr];
+            if (dayData && dayData.vitals && Array.isArray(dayData.vitals)) {
+                // Vitals are unshifted (newest first), so copy and reverse to plot chronologically
+                const dayVitals = [...dayData.vitals].reverse();
+                
+                dayVitals.forEach(v => {
+                    if (v.type === "Blood Pressure" && readingsCount < 7) {
+                        labels.push(`${dateStr.split('/')[0]}/${dateStr.split('/')[1]} ${v.time}`);
+                        
+                        const numbers = v.reading.split('/');
+                        systolicData.push(parseInt(numbers[0]) || 0);
+                        diastolicData.push(parseInt(numbers[1]) || 0);
+                        readingsCount++;
+                    }
+                });
+            }
+        }
+
+        // If no data exists yet, show an empty state visual placeholder
+        if (systolicData.length === 0) {
+            labels.push("No Data");
+            systolicData.push(120);
+            diastolicData.push(80);
+        }
+
+        bpChartInstance = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Systolic (Top)',
+                        data: systolicData,
+                        borderColor: '#e11d48', // Tailwind Rose-600
+                        backgroundColor: 'rgba(225, 29, 72, 0.05)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#e11d48',
+                        tension: 0.3,
+                        fill: true
+                    },
+                    {
+                        label: 'Diastolic (Bottom)',
+                        data: diastolicData,
+                        borderColor: '#2563eb', // Tailwind Blue-600
+                        backgroundColor: 'rgba(37, 99, 235, 0.05)',
+                        borderWidth: 3,
+                        pointBackgroundColor: '#2563eb',
+                        tension: 0.3,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        min: 40,
+                        max: 180,
+                        grid: { color: '#f3f4f6', drawBorder: false },
+                        ticks: { font: { size: 10 }, color: '#9ca3af' }
+                    },
+                    x: {
+                        grid: { display: false, drawBorder: false },
+                        ticks: { font: { size: 9 }, color: '#9ca3af' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: { usePointStyle: true, boxWidth: 6, font: { size: 11 } }
+                    }
+                }
+            }
+        });
+    };
+	
+	renderBPChart();
+	
+	window.renderCalorieChart = function() {
         const ctx = document.getElementById('calorieChart');
         if (!ctx) return;
 
