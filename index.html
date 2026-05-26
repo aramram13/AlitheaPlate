@@ -28,7 +28,7 @@
 
     <header class="bg-black text-white p-4 flex justify-center items-center shadow-md z-10 relative border-b-2 border-yellow-600/30">
         <div class="flex items-center gap-3">
-            <img src="Logo.png" alt="Alithea Wellness Logo" class="w-10 h-10 object-contain rounded">
+            <img src="Logo.png" alt="Alithea Wellness Logo" class="w-16 h-16 object-contain rounded">
             <h1 class="font-black text-xl tracking-widest text-yellow-500 uppercase font-serif">Alithea Wellness</h1>
         </div>
     </header>
@@ -674,6 +674,7 @@
             // Reset the scan form when opening camera
             const imgUpload = document.getElementById('image-upload');
             if (imgUpload) imgUpload.value = '';
+            mealFilesArray = [];
             const userCtx = document.getElementById('user-context');
             if (userCtx) userCtx.value = '';
             const filePreview = document.getElementById('file-preview-container');
@@ -1863,8 +1864,8 @@
     };
 	
 	async function processImage() {
-        const files = Array.from(document.getElementById('image-upload').files);
-		const textPrompt = document.getElementById('user-context') ? document.getElementById('user-context').value.trim() : "";
+        const files = mealFilesArray;
+			const textPrompt = document.getElementById('user-context') ? document.getElementById('user-context').value.trim() : "";
 
 		if (files.length === 0 && textPrompt === "") {
         alert("Please either take a photo or type out a description of your meal!");
@@ -2071,21 +2072,25 @@
     const imgUploadEl = document.getElementById('image-upload');
     if (imgUploadEl) {
         imgUploadEl.addEventListener('change', (e) => {
-            const files = Array.from(e.target.files);
-            const fileCount = files.length;
-            const previewContainer = document.getElementById('file-preview-container');
-            const countText = document.getElementById('file-count-text');
-            
-            if (fileCount > 0) {
-                // NEW: Fire the preview rendering function
-                renderImagePreviews(files, 'thumbnail-preview-grid');
-                
-                countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
-                previewContainer.classList.remove('hidden');
-            } else {
-                previewContainer.classList.add('hidden');
-            }
-        });
+               // Append new files to our array instead of overwriting
+               const newFiles = Array.from(e.target.files);
+               mealFilesArray = mealFilesArray.concat(newFiles);
+               
+               const fileCount = mealFilesArray.length;
+               const previewContainer = document.getElementById('file-preview-container');
+               const countText = document.getElementById('file-count-text');
+               
+               if (fileCount > 0) {
+                   renderImagePreviews(mealFilesArray, 'thumbnail-preview-grid');
+                   countText.innerText = `📸 ${fileCount} image${fileCount > 1 ? 's' : ''} selected. Ready to scan!`;
+                   previewContainer.classList.remove('hidden');
+               } else {
+                   previewContainer.classList.add('hidden');
+               }
+               
+               // Reset the input so clicking it again works smoothly
+               e.target.value = '';
+           });
     }
 
     const resetBtnEl = document.getElementById('reset-btn');
@@ -2137,6 +2142,7 @@
             
             // Reset file input and go to dashboard
             document.getElementById('image-upload').value = '';
+            mealFilesArray = [];
             document.getElementById('user-context').value = '';
             if (document.getElementById('correction-context')) document.getElementById('correction-context').value = '';
             document.getElementById('file-preview-container').classList.add('hidden');
