@@ -26,10 +26,13 @@
 
 <div class="max-w-md mx-auto bg-white min-h-screen flex flex-col shadow-xl overflow-hidden relative">
 
-    <header class="bg-black text-white p-4 flex justify-center items-center shadow-md z-10 relative border-b-2 border-yellow-600/30">
+    <header class="bg-black text-white p-4 flex justify-between items-center shadow-md z-10 relative border-b-2 border-yellow-600/30">
         <div class="flex items-center gap-3">
             <img src="Logo.png" alt="Alithea Wellness Logo" class="w-16 h-16 object-contain rounded">
             <h1 class="font-black text-xl tracking-widest text-yellow-500 uppercase font-serif">Alithea Wellness</h1>
+        </div>
+        <div id="streak-badge" class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/30 font-bold px-3 py-1.5 rounded-xl text-sm flex items-center gap-1.5 shadow-sm hidden">
+            🔥 <span id="streak-count">0</span>
         </div>
     </header>
 
@@ -54,32 +57,118 @@
     </nav>
 
     <!-- SCREEN: WELCOME / GOALS -->
-    <div id="screen-welcome" class="p-6 flex flex-col flex-grow pb-28">
+    <div id="screen-welcome" class="p-6 flex flex-col flex-grow overflow-y-auto pb-28">
         <h2 class="text-3xl font-extrabold mb-2 text-gray-900">Welcome! 👋</h2>
-        <p id="welcome-message" class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
-		<p class="text-gray-500 text-sm mb-6">Let's customize your scoring engine. What is your primary dietary focus?</p>
+        <p id="welcome-message" class="text-gray-500 text-sm mb-4 leading-relaxed"></p>
+        <p class="text-gray-700 text-sm font-bold mb-4">Let's customize your AI engine so it can give you personalized, accurate feedback.</p>
         
-        <div class="space-y-3 mb-8">
-            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
-                <input type="checkbox" name="goal" value="General Healthy / Balanced Eating" checked class="w-5 h-5 text-emerald-600">
-                <span class="ml-3 font-medium text-gray-700">General Healthy / Balanced Eating</span>
-            </label>
-            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
-                <input type="checkbox" name="goal" value="Heart Healthy (Low Sodium/Lower Fat)" class="w-5 h-5 text-emerald-600">
-                <span class="ml-3 font-medium text-gray-700">Heart Healthy (Low Sodium/Lower Fat)</span>
-            </label>
-            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
-                <input type="checkbox" name="goal" value="Fitness & High Protein" class="w-5 h-5 text-emerald-600">
-                <span class="ml-3 font-medium text-gray-700">Fitness & High Protein</span>
-            </label>
-            <label class="flex items-center p-4 border-2 border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all">
-                <input type="checkbox" name="goal" value="Diabetic (Blood Sugar, Low Glycemic, & Carb Focus)" class="w-5 h-5 text-emerald-600">
-                <span class="ml-3 font-medium text-gray-700">Diabetic (Blood Sugar & Carb Focus)</span>
-            </label>
+        <!-- PRIVACY BADGE -->
+        <div class="bg-blue-50 border border-blue-100 rounded-xl p-3 mb-6 flex items-start gap-3 shadow-sm">
+            <span class="text-xl">🔒</span>
+            <p class="text-xs text-blue-800 leading-relaxed"><strong class="block mb-0.5">Your Data is Private.</strong>Everything you enter is stored strictly locally on this device. We do not sell or upload your personal health data to external databases.</p>
         </div>
 
-        <button onclick="saveGoalsAndEnter()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-auto transition-colors">
-            Save & Go to Dashboard
+        <div class="space-y-5 mb-8">
+            <!-- BASIC VITALS -->
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide border-b pb-2">Basic Profile</h3>
+                
+                <div class="mb-4 mt-3">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">First Name</label>
+                    <input type="text" id="welcome-name" placeholder="e.g., Aaron" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                </div>
+
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Age</label>
+                        <input type="number" id="welcome-age" placeholder="e.g., 30" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Weight (lbs)</label>
+                        <input type="number" id="welcome-weight" placeholder="e.g., 165" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+                
+                <div class="flex gap-4">
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Height (Ft)</label>
+                        <input type="number" id="welcome-feet" placeholder="e.g., 5" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Inches</label>
+                        <input type="number" id="welcome-inches" placeholder="e.g., 10" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Biological Sex</label>
+                    <select id="welcome-sex" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-2.5 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 appearance-none">
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- GOALS -->
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-4">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide border-b pb-2">Your Goals</h3>
+                
+                <div class="mb-4">
+                 <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fitness Objective</label>
+                 <div class="space-y-2">
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="welcome-fitness-goal" value="Maintain Weight & General Health" checked class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Maintain Weight & General Health</span>
+                     </label>
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="welcome-fitness-goal" value="Lose Weight / Fat Loss" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Lose Weight / Fat Loss</span>
+                     </label>
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="welcome-fitness-goal" value="Build Muscle / Hypertrophy" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Build Muscle / Hypertrophy</span>
+                     </label>
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="welcome-fitness-goal" value="Improve Cardiovascular Endurance" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Improve Cardiovascular Endurance</span>
+                     </label>
+                 </div>
+             </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Primary Dietary Focus</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                            <input type="checkbox" name="welcome-goal" value="General Healthy / Balanced Eating" checked class="w-4 h-4 text-emerald-600">
+                            <span class="ml-3 text-sm font-medium text-gray-700">General Healthy / Balanced</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                            <input type="checkbox" name="welcome-goal" value="Heart Healthy (Low Sodium/Lower Fat)" class="w-4 h-4 text-emerald-600">
+                            <span class="ml-3 text-sm font-medium text-gray-700">Heart Healthy (Low Sodium/Fat)</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                            <input type="checkbox" name="welcome-goal" value="Fitness & High Protein" class="w-4 h-4 text-emerald-600">
+                            <span class="ml-3 text-sm font-medium text-gray-700">Fitness & High Protein</span>
+                        </label>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                            <input type="checkbox" name="welcome-goal" value="Diabetic (Blood Sugar, Low Glycemic, & Carb Focus)" class="w-4 h-4 text-emerald-600">
+                            <span class="ml-3 text-sm font-medium text-gray-700">Diabetic (Carb Focus)</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- MEDICAL CONTEXT -->
+            <div class="bg-white p-4 rounded-xl border border-gray-200 shadow-sm">
+                <h3 class="text-xs font-bold text-gray-500 uppercase tracking-wide border-b pb-2 mb-3">Health Context</h3>
+                <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Medications & Supplements</label>
+                <textarea id="welcome-meds" placeholder="e.g., Lisinopril, Whey Protein, Daily Multivitamin, etc. (Optional)" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none shadow-sm" rows="2"></textarea>
+                <p class="text-[10px] text-gray-400 mt-1 italic">This allows the AI to check for food/medication interactions.</p>
+            </div>
+        </div>
+
+        <button onclick="saveGoalsAndEnter()" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3.5 rounded-xl shadow-lg mt-auto transition-colors flex justify-center items-center gap-2">
+            Save & Enter Dashboard <span class="text-lg">→</span>
         </button>
     </div>
 
@@ -268,7 +357,11 @@
         <div class="bg-emerald-50 rounded-2xl p-5 mb-6 flex justify-between items-center shadow-sm border border-emerald-100">
             <div class="pr-4">
                 <h2 id="result-status" class="text-2xl font-black text-emerald-800 mb-1 leading-tight">Excellent Choice!</h2>
-                <p id="detected-meal" class="text-emerald-700 text-sm font-medium">Detected: Meal Name</p>
+				<p id="detected-meal" class="text-emerald-700 text-sm font-medium mb-1">Detected: Meal Name</p>
+                <div class="inline-flex items-center gap-1 bg-white/60 border border-emerald-200/50 rounded-lg px-3 py-1 shadow-sm mt-1">
+                    <span id="detected-calories" class="text-emerald-900 font-black text-lg">0</span>
+                    <span class="text-emerald-700 text-xs font-bold uppercase tracking-wide">kcal</span>
+                </div>
             </div>
             
             <div class="relative w-20 h-20 flex-shrink-0">
@@ -428,6 +521,10 @@
 
             <div class="space-y-4">
                 <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">First Name</label>
+                    <input type="text" id="profile-name" placeholder="e.g., Aaron" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
+                </div>
+                <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Age</label>
                     <input type="number" id="profile-age" placeholder="e.g., 30" class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500">
                 </div>
@@ -457,6 +554,35 @@
                 </div>
             </div>
             
+            <!-- NEW: FITNESS & MEDICAL CONTEXT -->
+            <div class="mb-6 space-y-4">
+                <div class="mb-4">
+                 <label class="block text-xs font-bold text-gray-500 uppercase mb-2">Fitness Objective</label>
+                 <div class="space-y-2">
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="profile-fitness-goal" value="Maintain Weight & General Health" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Maintain Weight & General Health</span>
+                     </label>
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="profile-fitness-goal" value="Lose Weight / Fat Loss" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Lose Weight / Fat Loss</span>
+                     </label>
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="profile-fitness-goal" value="Build Muscle / Hypertrophy" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Build Muscle / Hypertrophy</span>
+                     </label>
+                     <label class="flex items-center p-3 border border-gray-200 rounded-xl cursor-pointer hover:border-emerald-500 transition-all bg-gray-50">
+                         <input type="checkbox" name="profile-fitness-goal" value="Improve Cardiovascular Endurance" class="w-4 h-4 text-emerald-600">
+                         <span class="ml-3 text-sm font-medium text-gray-700">Improve Cardiovascular Endurance</span>
+                     </label>
+                 </div>
+             </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1">Medications & Supplements</label>
+                    <textarea id="profile-meds" placeholder="List medications or supplements..." class="w-full bg-gray-50 border border-gray-300 rounded-xl px-4 py-3 text-sm text-gray-800 focus:outline-none focus:border-emerald-500 resize-none" rows="2"></textarea>
+                </div>
+            </div>
+
             <!-- DIETARY GOALS SECTION -->
             <div class="mb-6">
                 <label class="block text-xs font-bold text-gray-500 uppercase mb-3">Dietary Focus</label>
@@ -634,8 +760,9 @@
 
 <script>
 
-    function navigateTo(screenId) {
-        // Hide all major screens
+    function navigateTo(screenId) {       
+	   if (navigator.vibrate) navigator.vibrate(15);
+	   // Hide all major screens
         ['screen-welcome', 'screen-dashboard', 'screen-capture', 'screen-loading', 'screen-results'].forEach(id => {
             const el = document.getElementById(id);
             if(el) el.classList.add('hidden');
@@ -1125,6 +1252,7 @@
         // Draw the weight chart for the currently viewed day
         renderWeightChart();
 		renderCalorieChart();
+		calculateStreak();
 
         // 6. Render the History List
         const historyContainer = document.getElementById('history-container');
@@ -1289,22 +1417,29 @@
         const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
         const userAge = profile.age || "30"; 
         const userWeight = profile.weight || "165";
+        const userName = profile.name || "there";
         const userSex = profile.sex || "male";
+        const userFitnessGoal = Array.isArray(profile.fitnessGoal) ? profile.fitnessGoal.join(" and ") : (profile.fitnessGoal || "General Health");
+        const userMeds = profile.medications || "None reported";
 
         const fitnessPrompt = `You are an expert personal trainer and metabolic calculator. 
+        The user's name is ${userName}. Use their name in your feedback to be encouraging and personal.
         The user's current profile is: Age ${userAge}, Weight ${userWeight} lbs, Biological Sex: ${userSex}.
+           Fitness Goal: ${userFitnessGoal}.
+           Medications/Supplements: ${userMeds}.
 
-        The user provided the following details (and potentially photos of the activity, equipment, or environment): 
-        ${context}
+           The user provided the following details: 
+           ${context}
 
-        Calculate the estimated calories burned using standard Metabolic Equivalent of Task (MET) formulas. If photos are provided, use them to gauge the effort, confirm the equipment, or analyze the space.
+           Calculate the estimated calories burned using standard Metabolic Equivalent (MET) formulas. Use photos if provided to gauge effort and equipment.
+           CRITICAL: Tailor your "feedback" directly to their Fitness Goal.
 
-        Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
-        {
-            "calories_burned": number,
-            "workout_summary": "A brief 3-5 word title",
-            "feedback": "A short, encouraging sentence about this specific activity."
-        }`;
+           Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
+           {
+               "calories_burned": number,
+               "workout_summary": "A brief 3-5 word title",
+               "feedback": "A short, encouraging sentence about this specific activity tied to their fitness goal."
+           }`;
 
         try {
             const base64Images = await Promise.all(files.map(file => compressImage(file, 800)));
@@ -1446,20 +1581,22 @@
         const recentMeals = dailyData.meals ? dailyData.meals.map(m => m.meal).join(", ") : "None logged";
         const recentWorkouts = dailyData.workouts ? dailyData.workouts.map(w => w.summary).join(", ") : "None logged";
 
+        const userName = profile.name || "there";
         const bpPrompt = `You are an expert, empathetic medical AI assistant.
+        The user's name is ${userName}. Address them by name to provide a comforting and personal touch.
         The user (Age: ${profile.age || "Unknown"}, Sex: ${profile.sex || "Unknown"}) just recorded a blood pressure reading of ${sys}/${dia}.
-        
-        User's direct context/medications: "${userCtx}"
+
+        User's direct context/medications for today: "${userCtx}"
         Meals logged today: ${recentMeals}
         Workouts logged today: ${recentWorkouts}
 
         Analyze this reading holistically. 
-        CRITICAL INSTRUCTION: Do not cause unnecessary alarm. If the reading is elevated, check the recent workouts and meals. If they recently worked out, clearly explain that elevated BP is a normal, temporary physiological response to exercise. If they ate a high-sodium meal, gently mention the correlation.
+        CRITICAL INSTRUCTION: Check their permanent Medications list. If they are on BP meds, factor that into your analysis. Check recent workouts and meals. Do not cause unnecessary alarm. If elevated, explain normal physiological responses to exercise or dietary correlations (like high sodium).
 
         Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
         {
             "status": "e.g., Normal, Elevated, Post-Workout Normal, Hypertension Stage 1",
-            "feedback": "A reassuring paragraph explaining the reading based on their specific context."
+            "feedback": "A reassuring paragraph explaining the reading based on their specific context, medications, and recent activities."
         }`;
 
         try {
@@ -1534,11 +1671,19 @@
         const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
         const goals = JSON.parse(localStorage.getItem('alitheaplate_goals') || '[]');
         
-        document.getElementById('profile-age').value = profile.age || '';
+        document.getElementById('profile-name').value = profile.name || '';
+		document.getElementById('profile-age').value = profile.age || '';
         document.getElementById('profile-feet').value = profile.feet || '';
         document.getElementById('profile-inches').value = profile.inches || '';
         document.getElementById('profile-weight').value = profile.weight || '';
         document.getElementById('profile-sex').value = profile.sex || 'male';
+        
+        // NEW: Load the fitness goal and medications into the form
+        const savedFitnessGoals = Array.isArray(profile.fitnessGoal) ? profile.fitnessGoal : [profile.fitnessGoal || 'Maintain Weight & General Health'];
+		document.querySelectorAll('input[name="profile-fitness-goal"]').forEach(cb => {
+         cb.checked = savedFitnessGoals.includes(cb.value);
+		});
+        document.getElementById('profile-meds').value = profile.medications || '';
         
         // Reset and check the boxes based on stored goals
         document.querySelectorAll('input[name="profile-goal"]').forEach(cb => {
@@ -1554,11 +1699,14 @@
 	
 	window.saveProfile = function() {
         const profile = {
-            age: document.getElementById('profile-age').value,
+            name: document.getElementById('profile-name').value.trim(),
+			age: document.getElementById('profile-age').value,
             feet: document.getElementById('profile-feet').value,
             inches: document.getElementById('profile-inches').value,
             weight: document.getElementById('profile-weight').value,
-            sex: document.getElementById('profile-sex').value
+            sex: document.getElementById('profile-sex').value,
+            fitnessGoal: Array.from(document.querySelectorAll('input[name="profile-fitness-goal"]:checked')).map(cb => cb.value),
+            medications: document.getElementById('profile-meds').value.trim()
         };
         
         // Save goals
@@ -1573,11 +1721,24 @@
     };
 
     window.saveGoalsAndEnter = function() {
-        // Grab goals from the welcome screen checkboxes
-        const selectedGoals = Array.from(document.querySelectorAll('input[name="goal"]:checked'))
+        // Grab data from the new Welcome Screen
+        const profile = {
+            name: document.getElementById('welcome-name').value.trim(),
+			age: document.getElementById('welcome-age').value,
+            feet: document.getElementById('welcome-feet').value,
+            inches: document.getElementById('welcome-inches').value,
+            weight: document.getElementById('welcome-weight').value,
+            sex: document.getElementById('welcome-sex').value,
+            fitnessGoal: Array.from(document.querySelectorAll('input[name="welcome-fitness-goal"]:checked')).map(cb => cb.value),
+            medications: document.getElementById('welcome-meds').value.trim()
+        };
+
+        const selectedGoals = Array.from(document.querySelectorAll('input[name="welcome-goal"]:checked'))
             .map(cb => cb.value);
         
+        localStorage.setItem('alitheaplate_profile', JSON.stringify(profile));
         localStorage.setItem('alitheaplate_goals', JSON.stringify(selectedGoals));
+        
         navigateTo('screen-dashboard');
     };
 
@@ -1667,6 +1828,41 @@
             dailyData[viewedStr].vitals.splice(index, 1);
             localStorage.setItem('alitheaplate_daily', JSON.stringify(dailyData));
             updateDashboard();
+        }
+    };
+	
+	// --- STREAK COUNTER LOGIC ---
+    window.calculateStreak = function() {
+        let dailyData = JSON.parse(localStorage.getItem('alitheaplate_daily') || '{}');
+        let streak = 0;
+        let d = new Date();
+        
+        while (true) {
+            let dateStr = d.toLocaleDateString();
+            let dayData = dailyData[dateStr];
+            
+            // Check if there is any logged activity for this specific day
+            if (dayData && ((dayData.meals && dayData.meals.length > 0) || (dayData.workouts && dayData.workouts.length > 0))) {
+                streak++;
+                d.setDate(d.getDate() - 1); // Move backward one day
+            } else {
+                // If today is empty, check if yesterday was logged before breaking the streak
+                if (streak === 0 && d.toLocaleDateString() === new Date().toLocaleDateString()) {
+                    d.setDate(d.getDate() - 1);
+                } else {
+                    break;
+                }
+            }
+        }
+
+        const badge = document.getElementById('streak-badge');
+        const count = document.getElementById('streak-count');
+        
+        if (streak > 0) {
+            count.innerText = streak;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
         }
     };
 	
@@ -1922,30 +2118,41 @@
                 contextInstruction += `\n\nCRITICAL USER CONTEXT TO FACTOR IN: "${userContext}"`;
             }
 
-            const prompt = `You are an empathetic, supportive, and balanced nutritional guide. The user's dietary focus is: ${selectedGoal}. 
-            ${contextInstruction}
+            const profile = JSON.parse(localStorage.getItem('alitheaplate_profile') || '{}');
+            const userName = profile.name || "there";
+            const userMeds = profile.medications || "None reported";
+            const userFitnessGoal = Array.isArray(profile.fitnessGoal) ? profile.fitnessGoal.join(" and ") : (profile.fitnessGoal || "General Health");
 
-            Evaluate the meal holistically. Do not be overly critical of minor details if the overall meal is healthy. 
-            
-            Crucially, provide a "Smart Deep Dive" specifically tailored to their dietary focus. If they selected Heart Healthy/Low Sodium, estimate the sodium and saturated fat. If Diabetic, estimate net carbs and sugar. If Fitness, estimate protein and calories.
+            const prompt = `You are an empathetic, supportive, and balanced nutritional guide. 
+            The user's name is ${userName}. Please use their name in your final recommendation to make it highly personal.
+            The user's dietary focus is: ${selectedGoal}.
+               Their overarching fitness goal is: ${userFitnessGoal}.
+               They are currently taking the following medications/supplements: ${userMeds}.
+               
+               ${contextInstruction}
 
-            Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
-            {
-                "meal_identified": "Name of meal or recipe",
-                "health_score": number 0-100,
-                "calories": number,
-                "targeted_metrics": [
-                    {
-                        "name": "Target Metric Name (e.g., Sodium, Protein, Net Carbs)",
-                        "value": "e.g., 850mg, 45g",
-                        "status": "good, warning, or danger",
-                        "context": "A short sentence explaining why this matters for their specific goal."
-                    }
-                ],
-                "positives": ["positive 1", "positive 2"],
-                "negatives": ["negative 1", "negative 2 (Leave empty if the meal is great)"],
-                "recommendation": "A gentle, actionable tip ONLY IF needed, otherwise provide encouraging praise for a great choice."
-            }`;
+               Evaluate the meal holistically. Do not be overly critical of minor details if the overall meal is healthy. 
+               CRITICAL INSTRUCTION: Cross-reference their medications. If a food item negatively interacts with their listed medication (e.g., Grapefruit and Statins), warn them in the "considerations". Tailor your final recommendation to support their overarching fitness goal.
+               
+               Provide a "Smart Deep Dive" tailored to their dietary focus (e.g., estimate sodium/fat for Heart Healthy, net carbs/sugar for Diabetic, protein/calories for Fitness).
+
+               Return ONLY a raw JSON object. Do not use markdown formatting. Structure exactly like this:
+               {
+                   "meal_identified": "Name of meal or recipe",
+                   "health_score": number 0-100,
+                   "calories": number,
+                   "targeted_metrics": [
+                       {
+                           "name": "Target Metric Name (e.g., Sodium, Protein, Net Carbs)",
+                           "value": "e.g., 850mg, 45g",
+                           "status": "good, warning, or danger",
+                           "context": "A short sentence explaining why this matters for their specific goal."
+                       }
+                   ],
+                   "positives": ["positive 1", "positive 2"],
+                   "negatives": ["negative 1", "negative 2 (Leave empty if the meal is great)"],
+                   "recommendation": "A gentle, actionable tip tied to their fitness goal ONLY IF needed, otherwise provide encouraging praise."
+               }`;
 
             const requestParts = [{ text: prompt }];
             
@@ -2010,7 +2217,8 @@
             document.getElementById('result-status').innerText = result.health_score >= 70 ? "Great Choice!" : "Needs Tweaking";
             document.getElementById('detected-meal').innerText = "Detected: " + result.meal_identified;
             document.getElementById('score-text').innerText = result.health_score;
-            
+            document.getElementById('detected-calories').innerText = result.calories || 0;
+			
 			// NEW: Render the Smart Deep Dives dynamically
             const deepDiveContainer = document.getElementById('deep-dive-container');
             if (result.targeted_metrics && result.targeted_metrics.length > 0) {
